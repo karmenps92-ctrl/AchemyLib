@@ -5,11 +5,10 @@
     ║    Matches Original Script 1:1                    ║
     ╚═══════════════════════════════════════════════════╝
     
-    Usage:
-        local AlchemyLib = loadstring(game:HttpGet("URL"))()
+]]    local AlchemyLib = loadstring(game:HttpGet("URL"))()
         local Hub = AlchemyLib:CreateHub()
         -- Hub.Theme, Hub.CreateToggle, Hub.CreateSlider, etc.
-]]
+
 
 local AlchemyLib = {}
 
