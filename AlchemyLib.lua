@@ -278,6 +278,7 @@ function AlchemyLib.CreateToggle(parent, name, default, callback)
     label.Font = Theme.FontLight
     label.TextColor3 = Theme.Text
     label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Name = "SearchLabel" -- Tag para busqueda
     label.Parent = holder
 
     local toggleBg = Instance.new("Frame")
@@ -354,6 +355,7 @@ function AlchemyLib.CreateSlider(parent, name, min, max, default, callback)
     label.Font = Theme.FontLight
     label.TextColor3 = Theme.Text
     label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Name = "SearchLabel" -- Tag para busqueda
     label.Parent = holder
 
     local valueLabel = Instance.new("TextLabel")
@@ -448,6 +450,7 @@ function AlchemyLib.CreateButton(parent, name, callback)
     btn.TextColor3 = Theme.Text
     btn.Font = Theme.Font
     btn.BorderSizePixel = 0
+    btn.Name = "SearchLabel" -- Tag para busqueda (usa Text directamente)
     btn.Parent = btnFrame
     CreateCorner(btn, 8)
     CreateGradient(btn, Theme.AccentDark, Theme.AccentLight, -45)
@@ -491,6 +494,7 @@ function AlchemyLib.CreateSection(parent, title)
     sec.TextColor3 = Theme.AccentLight
     sec.TextXAlignment = Enum.TextXAlignment.Left
     sec.TextYAlignment = Enum.TextYAlignment.Bottom
+    sec.Name = "SearchLabel" -- Tag para busqueda
     sec.Parent = parent
     return sec
 end
@@ -1479,14 +1483,76 @@ function AlchemyLib:CreateHub(config)
         end
     end)
 
-    -- Filtrar tabs al escribir
+    -- Filtrar contenido al escribir (Búsqueda Universal)
     SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
         local q = SearchInput.Text:lower()
+        
         if q == "" then
-            for _, btn in pairs(Hub.TabButtons) do btn.Visible = true end
+            -- Restaurar todo
+            for name, page in pairs(Hub.TabPages) do
+                for _, item in pairs(page:GetChildren()) do
+                    if item:IsA("Frame") or item:IsA("TextLabel") then
+                        item.Visible = true
+                    end
+                end
+                page.Visible = (name == Hub.ActiveTab)
+            end
+            Hub.SearchPage.Visible = false
+            -- Mover items de vuelta desde SearchPage
+            for _, item in pairs(Hub.SearchPage:GetChildren()) do
+                if item:IsA("Frame") or item:IsA("TextLabel") then
+                    local original = item:FindFirstChild("_originalParent")
+                    if original and original.Value then
+                        item.Parent = original.Value
+                    end
+                end
+            end
         else
-            for name, btn in pairs(Hub.TabButtons) do
-                btn.Visible = name:lower():find(q, 1, true) ~= nil
+            -- Proceso de búsqueda
+            Hub.SearchPage.Visible = true
+            -- Ocultar paginas normales
+            for _, page in pairs(Hub.TabPages) do page.Visible = false end
+            
+            -- Buscar en todas las páginas
+            for _, page in pairs(Hub.TabPages) do
+                if page == Hub.SearchPage then continue end
+                for _, item in pairs(page:GetChildren()) do
+                    if item:IsA("Frame") or item:IsA("TextLabel") then
+                        local searchTitle = ""
+                        local label = item:FindFirstChild("SearchLabel") or item
+                        if label:IsA("TextLabel") or label:IsA("TextButton") or label:IsA("TextBox") then
+                            searchTitle = label.Text:lower()
+                        end
+                        
+                        if searchTitle ~= "" and searchTitle:find(q, 1, true) then
+                            -- Guardar parent original si no existe
+                            if not item:FindFirstChild("_originalParent") then
+                                local val = Instance.new("ObjectValue", item)
+                                val.Name = "_originalParent"
+                                val.Value = page
+                            end
+                            item.Parent = Hub.SearchPage
+                            item.Visible = true
+                        end
+                    end
+                end
+            end
+            
+            -- Limpiar elementos en SearchPage que ya no coinciden
+            for _, item in pairs(Hub.SearchPage:GetChildren()) do
+                if item:IsA("Frame") or item:IsA("TextLabel") then
+                    local searchTitle = ""
+                    local label = item:FindFirstChild("SearchLabel") or item
+                    if label:IsA("TextLabel") or label:IsA("TextButton") or label:IsA("TextBox") then
+                        searchTitle = label.Text:lower()
+                    end
+                    if not searchTitle:find(q, 1, true) then
+                        local original = item:FindFirstChild("_originalParent")
+                        if original and original.Value then
+                            item.Parent = original.Value
+                        end
+                    end
+                end
             end
         end
     end)
@@ -1548,6 +1614,23 @@ function AlchemyLib:CreateHub(config)
     ContentArea.ClipsDescendants = true
     ContentArea.ZIndex = 2
     ContentArea.Parent = MainFrame
+
+    -- Pagina de busqueda universal
+    local SearchPage = Instance.new("ScrollingFrame")
+    SearchPage.Name = "SearchPage"
+    SearchPage.Size = UDim2.new(1, 0, 1, 0)
+    SearchPage.BackgroundTransparency = 1; SearchPage.BorderSizePixel = 0
+    SearchPage.ScrollBarThickness = 4; SearchPage.ScrollBarImageColor3 = Theme.AccentLight
+    SearchPage.Visible = false
+    SearchPage.CanvasSize = UDim2.new(0, 0, 0, 0)
+    SearchPage.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    SearchPage.Parent = ContentArea
+    Hub.SearchPage = SearchPage
+
+    local searchLayout = Instance.new("UIListLayout")
+    searchLayout.SortOrder = Enum.SortOrder.LayoutOrder; searchLayout.Padding = UDim.new(0, 6); searchLayout.Parent = SearchPage
+    local searchPad = Instance.new("UIPadding")
+    searchPad.PaddingTop = UDim.new(0, 10); searchPad.PaddingLeft = UDim.new(0, 8); searchPad.PaddingRight = UDim.new(0, 8); searchPad.Parent = SearchPage
 
     -- Dragging
     local dragToggle, dragInput, dragStart, startPos = nil, nil, nil, nil
@@ -1615,6 +1698,9 @@ function AlchemyLib:CreateHub(config)
 
     -- Metodo Global para cambiar de tab
     function Hub:SwitchTab(tabName)
+        if Hub.SearchInput and Hub.SearchInput.Text ~= "" then
+            Hub.SearchInput.Text = "" -- Reset search when switching tabs
+        end
         if Hub.ActiveTab == tabName then return end
         Hub.ActiveTab = tabName
         for n, b in pairs(Hub.TabButtons) do
