@@ -1,34 +1,34 @@
 --[[
     ╔═══════════════════════════════════════════════════╗
-    ║       🧪 ALCHEMY UI LIBRARY v4.1 🧪               ║
+    ║       ALCHEMY UI LIBRARY v5.0                     ║
     ║    Extracted UI Engine from Alchemy Hub           ║
-    ║    Matches Original Script 1:1                    ║
+    ║    Full pcall protection for all executors        ║
     ╚═══════════════════════════════════════════════════╝
-    
-]]    local AlchemyLib = loadstring(game:HttpGet("URL"))()
-        local Hub = AlchemyLib:CreateHub()
-        -- Hub.Theme, Hub.CreateToggle, Hub.CreateSlider, etc.
+]]
 
+print("[AlchemyLib] Loading library...")
 
 local AlchemyLib = {}
 
--- ══════════════════════════════════════
---          SERVICIOS PRINCIPALES
--- ══════════════════════════════════════
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
-local CoreGui = game:GetService("CoreGui")
 local Camera = Workspace.CurrentCamera
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
--- ══════════════════════════════════════
---      TEMA: MODERN DARK MAGIC
--- ══════════════════════════════════════
+-- Safe CoreGui access
+local function GetGuiParent()
+    local ok, gui = pcall(function() return game:GetService("CoreGui") end)
+    if ok and gui then return gui end
+    local ok2, gui2 = pcall(function() return (gethui and gethui()) or Player:WaitForChild("PlayerGui") end)
+    if ok2 and gui2 then return gui2 end
+    return Player:WaitForChild("PlayerGui")
+end
+
 AlchemyLib.Theme = {
     Background = Color3.fromRGB(15, 10, 25),
     BackgroundAlpha = 0.55,
@@ -53,56 +53,82 @@ AlchemyLib.Theme = {
 local Theme = AlchemyLib.Theme
 
 -- ══════════════════════════════════════
---        UTILIDADES UI Y ANIMACIÓN
+--        UTILIDADES UI (con pcall)
 -- ══════════════════════════════════════
 function AlchemyLib.CreateCorner(parent, radius)
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, radius or 8)
-    corner.Parent = parent
-    return corner
+    local ok, corner = pcall(function()
+        local c = Instance.new("UICorner")
+        c.CornerRadius = UDim.new(0, radius or 8)
+        c.Parent = parent
+        return c
+    end)
+    return ok and corner or nil
 end
 
 function AlchemyLib.CreateStroke(parent, color, thickness)
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = color or Theme.Border
-    stroke.Thickness = thickness or 1
-    stroke.Parent = parent
-    return stroke
+    local ok, stroke = pcall(function()
+        local s = Instance.new("UIStroke")
+        s.Color = color or Theme.Border
+        s.Thickness = thickness or 1
+        s.Parent = parent
+        return s
+    end)
+    if not ok then
+        -- Fallback: usar un borde visual con un Frame
+        pcall(function()
+            local border = Instance.new("Frame")
+            border.Name = "FallbackBorder"
+            border.Size = UDim2.new(1, 2, 1, 2)
+            border.Position = UDim2.new(0, -1, 0, -1)
+            border.BackgroundColor3 = color or Theme.Border
+            border.BackgroundTransparency = 0.7
+            border.BorderSizePixel = 0
+            border.ZIndex = parent.ZIndex - 1
+            border.Parent = parent
+            AlchemyLib.CreateCorner(border, 8)
+        end)
+    end
+    return ok and stroke or nil
 end
 
 function AlchemyLib.CreateGradient(parent, c1, c2, rotation)
-    local gradient = Instance.new("UIGradient")
-    gradient.Color = ColorSequence.new(c1, c2)
-    gradient.Rotation = rotation or 90
-    gradient.Parent = parent
-    return gradient
+    local ok, gradient = pcall(function()
+        local g = Instance.new("UIGradient")
+        g.Color = ColorSequence.new(c1, c2)
+        g.Rotation = rotation or 90
+        g.Parent = parent
+        return g
+    end)
+    return ok and gradient or nil
 end
 
 function AlchemyLib.CreateShadow(parent)
-    local shadow = Instance.new("ImageLabel")
-    shadow.Name = "Shadow"
-    shadow.BackgroundTransparency = 1
-    shadow.Position = UDim2.new(0, -15, 0, -15)
-    shadow.Size = UDim2.new(1, 30, 1, 30)
-    shadow.ZIndex = parent.ZIndex - 1
-    shadow.Image = "rbxassetid://5554236805"
-    shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    shadow.ImageTransparency = 0.6
-    shadow.ScaleType = Enum.ScaleType.Slice
-    shadow.SliceCenter = Rect.new(23, 23, 277, 277)
-    shadow.Parent = parent
-    return shadow
+    local ok, shadow = pcall(function()
+        local s = Instance.new("ImageLabel")
+        s.Name = "Shadow"
+        s.BackgroundTransparency = 1
+        s.Position = UDim2.new(0, -15, 0, -15)
+        s.Size = UDim2.new(1, 30, 1, 30)
+        s.ZIndex = math.max(parent.ZIndex - 1, 0)
+        s.Image = "rbxassetid://5554236805"
+        s.ImageColor3 = Color3.fromRGB(0, 0, 0)
+        s.ImageTransparency = 0.6
+        s.ScaleType = Enum.ScaleType.Slice
+        s.SliceCenter = Rect.new(23, 23, 277, 277)
+        s.Parent = parent
+        return s
+    end)
+    return ok and shadow or nil
 end
 
 function AlchemyLib.Tween(obj, props, duration, style, direction)
-    local tweenInfo = TweenInfo.new(
-        duration or 0.3,
-        style or Enum.EasingStyle.Quart,
-        direction or Enum.EasingDirection.Out
-    )
-    local tween = TweenService:Create(obj, tweenInfo, props)
-    tween:Play()
-    return tween
+    local ok, tween = pcall(function()
+        local ti = TweenInfo.new(duration or 0.3, style or Enum.EasingStyle.Quart, direction or Enum.EasingDirection.Out)
+        local t = TweenService:Create(obj, ti, props)
+        t:Play()
+        return t
+    end)
+    return ok and tween or nil
 end
 
 function AlchemyLib.BumpyTween(obj, props, duration)
@@ -110,32 +136,31 @@ function AlchemyLib.BumpyTween(obj, props, duration)
 end
 
 function AlchemyLib.Ripple(button)
-    local ripple = Instance.new("Frame")
-    ripple.Name = "Ripple"
-    ripple.BackgroundColor3 = Theme.AccentLight
-    ripple.BackgroundTransparency = 0.6
-    ripple.BorderSizePixel = 0
-    ripple.ZIndex = button.ZIndex + 1
-    ripple.Parent = button
-    AlchemyLib.CreateCorner(ripple, 100)
-
-    local mousePos = UserInputService:GetMouseLocation()
-    local absPos = button.AbsolutePosition
-    local relX = mousePos.X - absPos.X
-    local relY = mousePos.Y - absPos.Y
-    ripple.Position = UDim2.new(0, relX, 0, relY)
-    ripple.Size = UDim2.new(0, 0, 0, 0)
-
-    local maxSize = math.max(button.AbsoluteSize.X, button.AbsoluteSize.Y) * 2.5
-    AlchemyLib.Tween(ripple, {
-        Size = UDim2.new(0, maxSize, 0, maxSize),
-        Position = UDim2.new(0, relX - maxSize/2, 0, relY - maxSize/2),
-        BackgroundTransparency = 1
-    }, 0.7, Enum.EasingStyle.Sine)
-    task.delay(0.7, function() ripple:Destroy() end)
+    pcall(function()
+        local ripple = Instance.new("Frame")
+        ripple.Name = "Ripple"
+        ripple.BackgroundColor3 = Theme.AccentLight
+        ripple.BackgroundTransparency = 0.6
+        ripple.BorderSizePixel = 0
+        ripple.ZIndex = button.ZIndex + 1
+        ripple.Parent = button
+        AlchemyLib.CreateCorner(ripple, 100)
+        local mousePos = UserInputService:GetMouseLocation()
+        local absPos = button.AbsolutePosition
+        local relX = mousePos.X - absPos.X
+        local relY = mousePos.Y - absPos.Y
+        ripple.Position = UDim2.new(0, relX, 0, relY)
+        ripple.Size = UDim2.new(0, 0, 0, 0)
+        local maxSize = math.max(button.AbsoluteSize.X, button.AbsoluteSize.Y) * 2.5
+        AlchemyLib.Tween(ripple, {
+            Size = UDim2.new(0, maxSize, 0, maxSize),
+            Position = UDim2.new(0, relX - maxSize/2, 0, relY - maxSize/2),
+            BackgroundTransparency = 1
+        }, 0.7, Enum.EasingStyle.Sine)
+        task.delay(0.7, function() pcall(function() ripple:Destroy() end) end)
+    end)
 end
 
--- Shorthand locals
 local CreateCorner = AlchemyLib.CreateCorner
 local CreateStroke = AlchemyLib.CreateStroke
 local CreateGradient = AlchemyLib.CreateGradient
@@ -145,10 +170,9 @@ local BumpyTween = AlchemyLib.BumpyTween
 local Ripple = AlchemyLib.Ripple
 
 -- ══════════════════════════════════════
---    COMPONENTES UI (Idénticos al Original)
+--    COMPONENTES UI
 -- ══════════════════════════════════════
 
--- Función para crear toggle animado interactivo
 function AlchemyLib.CreateToggle(parent, name, default, callback)
     local holder = Instance.new("Frame")
     holder.Size = UDim2.new(1, -16, 0, 44)
@@ -225,7 +249,6 @@ function AlchemyLib.CreateToggle(parent, name, default, callback)
     return holder, function() return state end
 end
 
--- Función para crear slider animado interactivo
 function AlchemyLib.CreateSlider(parent, name, min, max, default, callback)
     local holder = Instance.new("Frame")
     holder.Size = UDim2.new(1, -16, 0, 58)
@@ -275,7 +298,6 @@ function AlchemyLib.CreateSlider(parent, name, min, max, default, callback)
     CreateCorner(sliderFill, 4)
     CreateGradient(sliderFill, Theme.AccentDark, Theme.AccentLight, 0)
 
-    -- Bolita del slider (knob)
     local knob = Instance.new("Frame")
     knob.Size = UDim2.new(0, 16, 0, 16)
     knob.Position = UDim2.new(1, -8, 0.5, -8)
@@ -323,7 +345,6 @@ function AlchemyLib.CreateSlider(parent, name, min, max, default, callback)
     return holder
 end
 
--- Función para crear botón elástico
 function AlchemyLib.CreateButton(parent, name, callback)
     local btnFrame = Instance.new("Frame")
     btnFrame.Size = UDim2.new(1, -16, 0, 42)
@@ -346,10 +367,12 @@ function AlchemyLib.CreateButton(parent, name, callback)
     CreateGradient(btn, Theme.AccentDark, Theme.AccentLight, -45)
 
     local glow = CreateShadow(btn)
-    glow.ImageColor3 = Theme.AccentLight
-    glow.ImageTransparency = 0.5
-    glow.Size = UDim2.new(1, 24, 1, 24)
-    glow.Position = UDim2.new(0, -12, 0, -12)
+    if glow then
+        glow.ImageColor3 = Theme.AccentLight
+        glow.ImageTransparency = 0.5
+        glow.Size = UDim2.new(1, 24, 1, 24)
+        glow.Position = UDim2.new(0, -12, 0, -12)
+    end
 
     btn.MouseButton1Down:Connect(function()
         Tween(btn, {Size = UDim2.new(0.92, 0, 0.8, 0)}, 0.15)
@@ -357,23 +380,21 @@ function AlchemyLib.CreateButton(parent, name, callback)
     btn.MouseButton1Up:Connect(function()
         BumpyTween(btn, {Size = UDim2.new(1, 0, 1, 0)}, 0.5)
     end)
-
     btn.MouseButton1Click:Connect(function()
         Ripple(btn)
         if callback then callback() end
     end)
     btn.MouseEnter:Connect(function()
         Tween(btn, {BackgroundTransparency = 0}, 0.2)
-        Tween(glow, {ImageTransparency = 0.2, Size = UDim2.new(1, 36, 1, 36), Position = UDim2.new(0, -18, 0, -18)}, 0.3)
+        if glow then Tween(glow, {ImageTransparency = 0.2, Size = UDim2.new(1, 36, 1, 36), Position = UDim2.new(0, -18, 0, -18)}, 0.3) end
     end)
     btn.MouseLeave:Connect(function()
         Tween(btn, {BackgroundTransparency = 0.1, Size = UDim2.new(1, 0, 1, 0)}, 0.2)
-        Tween(glow, {ImageTransparency = 0.5, Size = UDim2.new(1, 24, 1, 24), Position = UDim2.new(0, -12, 0, -12)}, 0.3)
+        if glow then Tween(glow, {ImageTransparency = 0.5, Size = UDim2.new(1, 24, 1, 24), Position = UDim2.new(0, -12, 0, -12)}, 0.3) end
     end)
     return btnFrame
 end
 
--- Función separador/sección
 function AlchemyLib.CreateSection(parent, title)
     local sec = Instance.new("TextLabel")
     sec.Size = UDim2.new(1, -16, 0, 32)
@@ -388,28 +409,29 @@ function AlchemyLib.CreateSection(parent, title)
     return sec
 end
 
--- Función para crear Keybind (igual que en Configuration del original)
 function AlchemyLib.CreateKeybind(parent, name, configTable, configKey)
-    local btn = AlchemyLib.CreateButton(parent, name .. ": " .. configTable[configKey].Name, function() end)
+    local btn = AlchemyLib.CreateButton(parent, name .. ": " .. tostring(configTable[configKey] and configTable[configKey].Name or "?"), function() end)
     local isBinding = false
-    btn:FindFirstChildOfClass("TextButton").MouseButton1Click:Connect(function()
-        if isBinding then return end
-        isBinding = true
-        btn:FindFirstChildOfClass("TextButton").Text = "... PRESIONANDO ..."
-        local conn
-        conn = UserInputService.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.Keyboard then
-                configTable[configKey] = i.KeyCode
-                btn:FindFirstChildOfClass("TextButton").Text = name .. ": " .. i.KeyCode.Name
-                isBinding = false
-                conn:Disconnect()
-            end
+    local textBtn = btn:FindFirstChildOfClass("TextButton")
+    if textBtn then
+        textBtn.MouseButton1Click:Connect(function()
+            if isBinding then return end
+            isBinding = true
+            textBtn.Text = "... PRESIONANDO ..."
+            local conn
+            conn = UserInputService.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.Keyboard then
+                    configTable[configKey] = i.KeyCode
+                    textBtn.Text = name .. ": " .. i.KeyCode.Name
+                    isBinding = false
+                    conn:Disconnect()
+                end
+            end)
         end)
-    end)
+    end
     return btn
 end
 
--- Función para crear TextBox
 function AlchemyLib.CreateTextBox(parent, labelText, placeholder, callback)
     local nameHolder = Instance.new("Frame")
     nameHolder.Size = UDim2.new(1, -16, 0, 62)
@@ -462,11 +484,13 @@ function AlchemyLib:CreateHub(config)
     config = config or {}
     local hubName = config.Name or "AlchemyHub"
     local hubTitle = config.Title or "ALCHEMY HUB"
-    local hubVersion = config.Version or "v4.1"
+    local hubVersion = config.Version or "v5.0"
     local hubAuthor = config.Author or "By Alchemy Studios"
     local hubIcon = config.Icon or "rbxassetid://131779754659128"
     local guiKey = config.GuiKey or Enum.KeyCode.Y
     local lowGFX = config.LowGFX or false
+
+    print("[AlchemyLib] Creating Hub: " .. hubTitle)
 
     local Hub = {}
     Hub.GUI_Open = true
@@ -474,18 +498,19 @@ function AlchemyLib:CreateHub(config)
     Hub.TabPages = {}
     Hub.ActiveTab = config.DefaultTab or nil
 
-    -- Destruir GUI anterior si existe
-    if CoreGui:FindFirstChild(hubName) then
-        CoreGui:FindFirstChild(hubName):Destroy()
-    end
+    -- Destruir GUI anterior
+    local guiParent = GetGuiParent()
+    pcall(function() if guiParent:FindFirstChild(hubName) then guiParent:FindFirstChild(hubName):Destroy() end end)
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = hubName
     ScreenGui.ResetOnSpawn = false
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.Parent = CoreGui
+    pcall(function() ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling end)
+    ScreenGui.Parent = guiParent
 
     Hub.ScreenGui = ScreenGui
+
+    print("[AlchemyLib] ScreenGui created in: " .. guiParent.Name)
 
     -- Ventana Principal
     local MainFrame = Instance.new("Frame")
@@ -501,39 +526,47 @@ function AlchemyLib:CreateHub(config)
 
     Hub.MainFrame = MainFrame
 
-    -- Dynamic Glow / Stroke outline
-    local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Theme.Accent
-    MainStroke.Thickness = 2
-    MainStroke.Transparency = 0.1
-    MainStroke.Parent = MainFrame
-    local MainStrokeGradient = CreateGradient(MainStroke, Theme.AccentDark, Theme.AccentLight, 0)
+    -- Stroke del borde principal (con pcall)
+    local MainStroke = nil
+    local MainStrokeGradient = nil
+    pcall(function()
+        MainStroke = Instance.new("UIStroke")
+        MainStroke.Color = Theme.Accent
+        MainStroke.Thickness = 2
+        MainStroke.Transparency = 0.1
+        MainStroke.Parent = MainFrame
+        MainStrokeGradient = CreateGradient(MainStroke, Theme.AccentDark, Theme.AccentLight, 0)
+    end)
 
     local MainShadow = CreateShadow(MainFrame)
-    MainShadow.ImageColor3 = Theme.AccentDark
-    MainShadow.ImageTransparency = 0.4
-    MainShadow.Size = UDim2.new(1, 40, 1, 40)
-    MainShadow.Position = UDim2.new(0, -20, 0, -20)
+    if MainShadow then
+        MainShadow.ImageColor3 = Theme.AccentDark
+        MainShadow.ImageTransparency = 0.4
+        MainShadow.Size = UDim2.new(1, 40, 1, 40)
+        MainShadow.Position = UDim2.new(0, -20, 0, -20)
+    end
 
-    -- Partículas Flotantes
+    -- Particulas Flotantes
     local ParticleHolder = Instance.new("Frame")
     ParticleHolder.Size = UDim2.new(1, 0, 1, 0)
     ParticleHolder.BackgroundTransparency = 1
     ParticleHolder.ZIndex = 0
     ParticleHolder.Parent = MainFrame
 
-    -- Hilo para animar el gradiente del borde
-    task.spawn(function()
-        local rot = 0
-        while task.wait(0.02) do
-            if not lowGFX and MainFrame.Parent then
-                rot = (rot + 1) % 360
-                MainStrokeGradient.Rotation = rot
+    -- Animacion del borde
+    if MainStrokeGradient then
+        task.spawn(function()
+            local rot = 0
+            while task.wait(0.02) do
+                if not lowGFX and MainFrame and MainFrame.Parent then
+                    rot = (rot + 1) % 360
+                    pcall(function() MainStrokeGradient.Rotation = rot end)
+                end
             end
-        end
-    end)
+        end)
+    end
 
-    -- Barra de título
+    -- Barra de titulo
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
     TitleBar.Size = UDim2.new(1, 0, 0, 50)
@@ -544,12 +577,14 @@ function AlchemyLib:CreateHub(config)
     TitleBar.ZIndex = 2
     TitleBar.Parent = MainFrame
 
-    local TitleIcon = Instance.new("ImageLabel")
-    TitleIcon.Size = UDim2.new(0, 32, 0, 32)
-    TitleIcon.Position = UDim2.new(0, 15, 0.5, -16)
-    TitleIcon.BackgroundTransparency = 1
-    TitleIcon.Image = hubIcon
-    TitleIcon.Parent = TitleBar
+    pcall(function()
+        local TitleIcon = Instance.new("ImageLabel")
+        TitleIcon.Size = UDim2.new(0, 32, 0, 32)
+        TitleIcon.Position = UDim2.new(0, 15, 0.5, -16)
+        TitleIcon.BackgroundTransparency = 1
+        TitleIcon.Image = hubIcon
+        TitleIcon.Parent = TitleBar
+    end)
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(0, 200, 1, 0)
@@ -584,7 +619,7 @@ function AlchemyLib:CreateHub(config)
     AuthorLabel.TextXAlignment = Enum.TextXAlignment.Left
     AuthorLabel.Parent = TitleBar
 
-    -- Botones de ventana
+    -- Botones ventana
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 32, 0, 32)
     CloseBtn.Position = UDim2.new(1, -45, 0.5, -16)
@@ -593,6 +628,7 @@ function AlchemyLib:CreateHub(config)
     CloseBtn.Text = "X"
     CloseBtn.TextSize = 14
     CloseBtn.Font = Theme.Font
+    CloseBtn.TextColor3 = Theme.Text
     CloseBtn.Parent = TitleBar
     CreateCorner(CloseBtn, 8)
 
@@ -604,6 +640,7 @@ function AlchemyLib:CreateHub(config)
     MinBtn.Text = "-"
     MinBtn.TextSize = 14
     MinBtn.Font = Theme.Font
+    MinBtn.TextColor3 = Theme.Text
     MinBtn.ZIndex = 3
     MinBtn.Parent = TitleBar
     CreateCorner(MinBtn, 8)
@@ -613,7 +650,7 @@ function AlchemyLib:CreateHub(config)
     MinBtn.MouseEnter:Connect(function() Tween(MinBtn, {BackgroundTransparency = 0.3}, 0.2) end)
     MinBtn.MouseLeave:Connect(function() Tween(MinBtn, {BackgroundTransparency = 0.8}, 0.2) end)
 
-    -- Línea separadora
+    -- Linea separadora
     local TitleLine = Instance.new("Frame")
     TitleLine.Size = UDim2.new(1, 0, 0, 1)
     TitleLine.Position = UDim2.new(0, 0, 1, 0)
@@ -672,17 +709,11 @@ function AlchemyLib:CreateHub(config)
     local dragToggle, dragInput, dragStart, startPos = nil, nil, nil, nil
     TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragToggle = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then dragToggle = false end
-            end)
+            dragToggle = true; dragStart = input.Position; startPos = MainFrame.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragToggle = false end end)
         end
     end)
-    TitleBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
-    end)
+    TitleBar.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end end)
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragToggle then
             local delta = input.Position - dragStart
@@ -690,63 +721,50 @@ function AlchemyLib:CreateHub(config)
         end
     end)
 
-    -- Toggle GUI con tecla
+    -- Toggle GUI
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end
         if input.KeyCode == guiKey then
             Hub.GUI_Open = not Hub.GUI_Open
-            if Hub.GUI_Open then
-                MainFrame.Visible = true
-                BumpyTween(MainFrame, {Size = UDim2.new(0, 650, 0, 460), BackgroundTransparency = Theme.BackgroundAlpha}, 0.6)
-            else
-                Tween(MainFrame, {Size = UDim2.new(0, 500, 0, 350), BackgroundTransparency = 1}, 0.3)
-                task.delay(0.3, function() if not Hub.GUI_Open then MainFrame.Visible = false end end)
-            end
+            if Hub.GUI_Open then MainFrame.Visible = true; BumpyTween(MainFrame, {Size = UDim2.new(0, 650, 0, 460), BackgroundTransparency = Theme.BackgroundAlpha}, 0.6)
+            else Tween(MainFrame, {Size = UDim2.new(0, 500, 0, 350), BackgroundTransparency = 1}, 0.3); task.delay(0.3, function() if not Hub.GUI_Open then MainFrame.Visible = false end end) end
         end
     end)
 
     -- Close & Minimize
     CloseBtn.MouseButton1Click:Connect(function()
-        Hub.GUI_Open = false
-        Tween(MainFrame, {Size = UDim2.new(0, 400, 0, 300), BackgroundTransparency = 1}, 0.3)
-        task.delay(0.3, function() ScreenGui:Destroy() end)
+        Hub.GUI_Open = false; Tween(MainFrame, {Size = UDim2.new(0, 400, 0, 300), BackgroundTransparency = 1}, 0.3)
+        task.delay(0.3, function() pcall(function() ScreenGui:Destroy() end) end)
     end)
-
     MinBtn.MouseButton1Click:Connect(function()
-        Hub.GUI_Open = false
-        Tween(MainFrame, {Size = UDim2.new(0, 500, 0, 350), BackgroundTransparency = 1}, 0.25)
+        Hub.GUI_Open = false; Tween(MainFrame, {Size = UDim2.new(0, 500, 0, 350), BackgroundTransparency = 1}, 0.25)
         task.delay(0.25, function() if not Hub.GUI_Open then MainFrame.Visible = false end end)
     end)
 
-    -- Animación de entrada avanzada
+    -- Animacion de entrada
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.BackgroundTransparency = 1
-    MainStroke.Transparency = 1
+    if MainStroke then pcall(function() MainStroke.Transparency = 1 end) end
 
     Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 460), BackgroundTransparency = Theme.BackgroundAlpha}, 0.8, Enum.EasingStyle.Exponential)
-    Tween(MainStroke, {Transparency = 0.1}, 1, Enum.EasingStyle.Quad)
+    if MainStroke then pcall(function() Tween(MainStroke, {Transparency = 0.1}, 1, Enum.EasingStyle.Quad) end) end
 
-    -- Partículas flotantes
+    -- Particulas flotantes
     task.spawn(function()
         while task.wait(1.5) do
-            if not lowGFX and MainFrame.Parent then
-                local orb = Instance.new("Frame")
-                orb.BackgroundColor3 = Theme.AccentLight
-                orb.BorderSizePixel = 0
-                orb.Size = UDim2.new(0, math.random(4, 9), 0, math.random(4, 9))
-                orb.Position = UDim2.new(math.random(), 0, 1.2, 0)
-                orb.BackgroundTransparency = 0.4
-                CreateCorner(orb, 100)
-                orb.Parent = ParticleHolder
-
-                Tween(orb, {
-                    Position = UDim2.new(math.random(), 0, -0.2, 0),
-                    BackgroundTransparency = 1
-                }, math.random(5, 10), Enum.EasingStyle.Linear)
-                
-                task.delay(10, function() pcall(function() orb:Destroy() end) end)
+            if not lowGFX and MainFrame and MainFrame.Parent then
+                pcall(function()
+                    local orb = Instance.new("Frame")
+                    orb.BackgroundColor3 = Theme.AccentLight; orb.BorderSizePixel = 0
+                    orb.Size = UDim2.new(0, math.random(4, 9), 0, math.random(4, 9))
+                    orb.Position = UDim2.new(math.random(), 0, 1.2, 0)
+                    orb.BackgroundTransparency = 0.4
+                    CreateCorner(orb, 100); orb.Parent = ParticleHolder
+                    Tween(orb, {Position = UDim2.new(math.random(), 0, -0.2, 0), BackgroundTransparency = 1}, math.random(5, 10), Enum.EasingStyle.Linear)
+                    task.delay(10, function() pcall(function() orb:Destroy() end) end)
+                end)
             end
         end
     end)
@@ -775,36 +793,26 @@ function AlchemyLib:CreateHub(config)
         local page = Instance.new("ScrollingFrame")
         page.Name = tabName .. "Page"
         page.Size = UDim2.new(1, 0, 1, 0)
-        page.BackgroundTransparency = 1
-        page.BorderSizePixel = 0
-        page.ScrollBarThickness = 4
-        page.ScrollBarImageColor3 = Theme.AccentLight
+        page.BackgroundTransparency = 1; page.BorderSizePixel = 0
+        page.ScrollBarThickness = 4; page.ScrollBarImageColor3 = Theme.AccentLight
         page.Visible = false
         page.CanvasSize = UDim2.new(0, 0, 0, 0)
         page.AutomaticCanvasSize = Enum.AutomaticSize.Y
         page.Parent = ContentArea
 
         local pageLayout = Instance.new("UIListLayout")
-        pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        pageLayout.Padding = UDim.new(0, 6)
-        pageLayout.Parent = page
+        pageLayout.SortOrder = Enum.SortOrder.LayoutOrder; pageLayout.Padding = UDim.new(0, 6); pageLayout.Parent = page
 
         local pagePad = Instance.new("UIPadding")
-        pagePad.PaddingTop = UDim.new(0, 6)
-        pagePad.PaddingLeft = UDim.new(0, 8)
-        pagePad.PaddingRight = UDim.new(0, 8)
-        pagePad.PaddingBottom = UDim.new(0, 10)
+        pagePad.PaddingTop = UDim.new(0, 6); pagePad.PaddingLeft = UDim.new(0, 8)
+        pagePad.PaddingRight = UDim.new(0, 8); pagePad.PaddingBottom = UDim.new(0, 10)
         pagePad.Parent = page
 
         Hub.TabButtons[tabName] = tabBtn
         Hub.TabPages[tabName] = page
 
-        -- Auto-select first tab
         if not Hub.ActiveTab then
-            Hub.ActiveTab = tabName
-            tabBtn.BackgroundTransparency = 0.6
-            tabBtn.TextColor3 = Theme.Text
-            page.Visible = true
+            Hub.ActiveTab = tabName; tabBtn.BackgroundTransparency = 0.6; tabBtn.TextColor3 = Theme.Text; page.Visible = true
         end
 
         tabBtn.MouseButton1Click:Connect(function()
@@ -816,13 +824,8 @@ function AlchemyLib:CreateHub(config)
                 b.TextColor3 = isActive and Theme.Text or Theme.TextDim
             end
             for n, p in pairs(Hub.TabPages) do
-                if n == tabName then
-                    p.Visible = true
-                    p.Position = UDim2.new(0, 40, 0, 0)
-                    Tween(p, {Position = UDim2.new(0, 0, 0, 0)}, 0.5, Enum.EasingStyle.Quart)
-                else
-                    p.Visible = false
-                end
+                if n == tabName then p.Visible = true; p.Position = UDim2.new(0, 40, 0, 0); Tween(p, {Position = UDim2.new(0, 0, 0, 0)}, 0.5, Enum.EasingStyle.Quart)
+                else p.Visible = false end
             end
             Ripple(tabBtn)
         end)
@@ -830,14 +833,15 @@ function AlchemyLib:CreateHub(config)
         return page
     end
 
-    -- Destruir Hub
     function Hub:Destroy()
         Hub.GUI_Open = false
         Tween(MainFrame, {Size = UDim2.new(0, 400, 0, 300), BackgroundTransparency = 1}, 0.3)
-        task.delay(0.3, function() ScreenGui:Destroy() end)
+        task.delay(0.3, function() pcall(function() ScreenGui:Destroy() end) end)
     end
 
+    print("[AlchemyLib] Hub created successfully!")
     return Hub
 end
 
+print("[AlchemyLib] Library loaded successfully!")
 return AlchemyLib
