@@ -912,17 +912,67 @@ AlchemyLib.Languages = {
         ["Misc"]          = "Diversos",
         ["Scripts"]       = "Scripts",
         ["Configuration"] = "Configuração",
-        ["SPEED"]         = "VELOCIDADE",
+        ["SPEED"]         = "VELOCIDAD",
         ["FLY"]           = "VOAR",
         ["JUMP"]          = "PULAR",
         ["MISC"]          = "MISC",
-        ["PERSONAJE"]     = "PERSONAGEM",
+        ["PERSONAJE"]     = "PERSONAGGEM",
         ["VEHICULOS"]     = "VEÍCULOS",
         ["Speed Hack"]    = "Speed Hack",
         ["Fly"]           = "Voar",
         ["Noclip"]        = "Noclip",
         ["Infinite Jump"] = "Pulo Infinito",
         ["God Mode (Client)"] = "Modo Deus",
+    },
+    ["中文"] = {
+        ["Combat"]        = "战斗",
+        ["Visual"]        = "视觉",
+        ["Movement"]      = "移动",
+        ["Player"]        = "玩家",
+        ["Utilities"]     = "实用工具",
+        ["World"]         = "世界",
+        ["Server"]        = "服务器",
+        ["Shaders"]       = "着色器",
+        ["Animations"]    = "动画",
+        ["Misc"]          = "杂项",
+        ["Scripts"]       = "脚本",
+        ["Configuration"] = "配置",
+        ["SPEED"]         = "速度",
+        ["FLY"]           = "飞行",
+        ["JUMP"]          = "跳跃",
+        ["MISC"]          = "杂项",
+        ["PERSONAJE"]     = "角色",
+        ["VEHICULOS"]     = "车辆",
+        ["Speed Hack"]    = "速度修改",
+        ["Fly"]           = "飞行",
+        ["Noclip"]        = "穿墙",
+        ["Infinite Jump"] = "无限跳跃",
+        ["God Mode (Client)"] = "上帝模式",
+    },
+    ["日本語"] = {
+        ["Combat"]        = "戦闘",
+        ["Visual"]        = "ビジュアル",
+        ["Movement"]      = "移動",
+        ["Player"]        = "プレイヤー",
+        ["Utilities"]     = "ユーティリティ",
+        ["World"]         = "ワールド",
+        ["Server"]        = "サーバー",
+        ["Shaders"]       = "シェーダー",
+        ["Animations"]    = "アニメーション",
+        ["Misc"]          = "その他",
+        ["Scripts"]       = "スクリプト",
+        ["Configuration"] = "設定",
+        ["SPEED"]         = "スピード",
+        ["FLY"]           = "飛行",
+        ["JUMP"]          = "ジャンプ",
+        ["MISC"]          = "その他",
+        ["PERSONAJE"]     = "キャラクター",
+        ["VEHICULOS"]     = "乗り物",
+        ["Speed Hack"]    = "スピードハック",
+        ["Fly"]           = "フライ",
+        ["Noclip"]        = "ノークリップ",
+        ["Infinite Jump"] = "無限ジャンプ",
+        ["God Mode (Client)"] = "ゴッドモード",
     },
 }
 
@@ -956,13 +1006,13 @@ function AlchemyLib.CreateDropdown(parent, label, options, default, callback)
     local selected = default or options[1] or ""
     local isOpen = false
 
-    -- Contenedor externo (crece al abrir)
     local holder = Instance.new("Frame")
     holder.Size = UDim2.new(1, -16, 0, 44)
     holder.BackgroundColor3 = Theme.Tertiary
     holder.BackgroundTransparency = 0.2
     holder.BorderSizePixel = 0
     holder.ClipsDescendants = false
+    holder.ZIndex = 5 -- Asegura estar sobre otros botones
     holder.Parent = parent
     CreateCorner(holder, 8)
     CreateStroke(holder, Theme.Border, 1.5)
@@ -1352,16 +1402,17 @@ function AlchemyLib:CreateHub(config)
     SearchBtn.MouseEnter:Connect(function() Tween(SearchBtn, {BackgroundTransparency = 0.3}, 0.2) end)
     SearchBtn.MouseLeave:Connect(function() Tween(SearchBtn, {BackgroundTransparency = 0.8}, 0.2) end)
 
-    -- Barra de búsqueda (oculta por defecto, aparece debajo del TitleBar)
+    -- Barra de búsqueda (Flotante por encima del menú en v4.2.1)
     local SearchBar = Instance.new("Frame")
     SearchBar.Name = "SearchBar"
-    SearchBar.Size = UDim2.new(1, -176, 0, 0) -- empieza colapsada
-    SearchBar.Position = UDim2.new(0, 8, 0, 51)
+    SearchBar.Size = UDim2.new(1, -176, 0, 0)
+    SearchBar.Position = UDim2.new(0, 80, 0, -42) -- Posición flotante arriba
+    SearchBar.AnchorPoint = Vector2.new(0, 0)
     SearchBar.BackgroundColor3 = Theme.Secondary
-    SearchBar.BackgroundTransparency = 0.1
+    SearchBar.BackgroundTransparency = 0.15
     SearchBar.BorderSizePixel = 0
     SearchBar.ClipsDescendants = true
-    SearchBar.ZIndex = 5
+    SearchBar.ZIndex = 10 -- Prioridad alta por ser buscador
     SearchBar.Visible = false
     SearchBar.Parent = MainFrame
     CreateCorner(SearchBar, 8)
