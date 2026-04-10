@@ -1419,25 +1419,32 @@ function AlchemyLib:CreateHub(config)
     SettingsBtn.MouseLeave:Connect(function() Tween(SettingsBtn, {BackgroundTransparency = 0.8}, 0.2) end)
     SettingsBtn.MouseButton1Click:Connect(function()
         BumpyTween(SettingsBtn)
-        self:SwitchTab("Configuration")
+        Hub:SwitchTab("Configuration")
     end)
 
 
     -- Barra de búsqueda (Flotante por encima del menú en v4.2.1)
     local SearchBar = Instance.new("Frame")
     SearchBar.Name = "SearchBar"
-    SearchBar.Size = UDim2.new(1, -176, 0, 0)
-    SearchBar.Position = UDim2.new(0, 80, 0, -42) -- Posición flotante arriba
+    SearchBar.Size = UDim2.new(0, MainFrame.AbsoluteSize.X - 176, 0, 0)
+    SearchBar.Position = UDim2.new(0, MainFrame.AbsolutePosition.X + 80, 0, MainFrame.AbsolutePosition.Y - 42)
     SearchBar.AnchorPoint = Vector2.new(0, 0)
     SearchBar.BackgroundColor3 = Theme.Secondary
     SearchBar.BackgroundTransparency = 0.15
     SearchBar.BorderSizePixel = 0
     SearchBar.ClipsDescendants = true
-    SearchBar.ZIndex = 10 -- Prioridad alta por ser buscador
+    SearchBar.ZIndex = 110 -- Prioridad alta por ser buscador
     SearchBar.Visible = false
-    SearchBar.Parent = MainFrame
+    SearchBar.Parent = ScreenGui -- Cambiado a ScreenGui para evitar que MainFrame lo recorte
     CreateCorner(SearchBar, 8)
     CreateStroke(SearchBar, Theme.Accent, 1)
+
+    RunService.RenderStepped:Connect(function()
+        if SearchBar.Visible and MainFrame.Visible then
+            SearchBar.Position = UDim2.new(0, MainFrame.AbsolutePosition.X + 80, 0, MainFrame.AbsolutePosition.Y - 42)
+            SearchBar.Size = UDim2.new(0, MainFrame.AbsoluteSize.X - 176, 0, SearchBar.Size.Y.Offset)
+        end
+    end)
 
     local SearchInput = Instance.new("TextBox")
     SearchInput.Size = UDim2.new(1, -12, 1, -8)
@@ -1450,7 +1457,7 @@ function AlchemyLib:CreateHub(config)
     SearchInput.TextColor3 = Theme.Text
     SearchInput.PlaceholderColor3 = Theme.TextDim
     SearchInput.ClearTextOnFocus = false
-    SearchInput.ZIndex = 6
+    SearchInput.ZIndex = 111
     SearchInput.Parent = SearchBar
 
     local searchOpen = false
@@ -1460,12 +1467,12 @@ function AlchemyLib:CreateHub(config)
         if searchOpen then
             SearchBar.Visible = true
             Tween(SearchBtn, {BackgroundColor3 = Theme.Accent, BackgroundTransparency = 0.2}, 0.2)
-            Tween(SearchBar, {Size = UDim2.new(1, -176, 0, 34)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+            Tween(SearchBar, {Size = UDim2.new(0, MainFrame.AbsoluteSize.X - 176, 0, 34)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
             task.delay(0.3, function() pcall(function() SearchInput:CaptureFocus() end) end)
         else
             SearchInput.Text = ""
             Tween(SearchBtn, {BackgroundColor3 = Theme.Accent, BackgroundTransparency = 0.8}, 0.2)
-            Tween(SearchBar, {Size = UDim2.new(1, -176, 0, 0)}, 0.2, Enum.EasingStyle.Quart)
+            Tween(SearchBar, {Size = UDim2.new(0, MainFrame.AbsoluteSize.X - 176, 0, 0)}, 0.2, Enum.EasingStyle.Quart)
             task.delay(0.2, function() pcall(function() SearchBar.Visible = false end) end)
             -- Mostrar todos los tabs de nuevo
             for _, btn in pairs(Hub.TabButtons) do btn.Visible = true end
@@ -1606,6 +1613,21 @@ function AlchemyLib:CreateHub(config)
         end
     end)
 
+    -- Metodo Global para cambiar de tab
+    function Hub:SwitchTab(tabName)
+        if Hub.ActiveTab == tabName then return end
+        Hub.ActiveTab = tabName
+        for n, b in pairs(Hub.TabButtons) do
+            local isActive = (n == tabName)
+            Tween(b, {BackgroundTransparency = isActive and 0.6 or 1}, 0.25)
+            b.TextColor3 = isActive and Theme.Text or Theme.TextDim
+        end
+        for n, p in pairs(Hub.TabPages) do
+            if n == tabName then p.Visible = true; p.Position = UDim2.new(0, 40, 0, 0); Tween(p, {Position = UDim2.new(0, 0, 0, 0)}, 0.5, Enum.EasingStyle.Quart)
+            else p.Visible = false end
+        end
+    end
+
     -- Crear Tab
     function Hub:CreateTab(tabName, tabIcon, order)
         local tabBtn = Instance.new("TextButton")
@@ -1653,17 +1675,7 @@ function AlchemyLib:CreateHub(config)
         end
 
         tabBtn.MouseButton1Click:Connect(function()
-            if Hub.ActiveTab == tabName then return end
-            Hub.ActiveTab = tabName
-            for n, b in pairs(Hub.TabButtons) do
-                local isActive = (n == tabName)
-                Tween(b, {BackgroundTransparency = isActive and 0.6 or 1}, 0.25)
-                b.TextColor3 = isActive and Theme.Text or Theme.TextDim
-            end
-            for n, p in pairs(Hub.TabPages) do
-                if n == tabName then p.Visible = true; p.Position = UDim2.new(0, 40, 0, 0); Tween(p, {Position = UDim2.new(0, 0, 0, 0)}, 0.5, Enum.EasingStyle.Quart)
-                else p.Visible = false end
-            end
+            Hub:SwitchTab(tabName)
             Ripple(tabBtn)
         end)
 
