@@ -1,8 +1,8 @@
 --[[
     ╔═══════════════════════════════════════════════════╗
-    ║       ALCHEMY UI LIBRARY v5.0                     ║
+    ║       ALCHEMY UI LIBRARY v5.1                     ║
     ║    Extracted UI Engine from Alchemy Hub           ║
-    ║    Full pcall protection for all executors        ║
+    ║    + Dropdown, Search Bar, Theme System           ║
     ╚═══════════════════════════════════════════════════╝
 ]]
 
@@ -168,6 +168,92 @@ local CreateShadow = AlchemyLib.CreateShadow
 local Tween = AlchemyLib.Tween
 local BumpyTween = AlchemyLib.BumpyTween
 local Ripple = AlchemyLib.Ripple
+
+-- ══════════════════════════════════════
+--    SISTEMA DE TEMAS PREDEFINIDOS
+-- ══════════════════════════════════════
+AlchemyLib.ThemePresets = {
+    ["Dark Magic"] = {
+        Background  = Color3.fromRGB(15, 10, 25),
+        Secondary   = Color3.fromRGB(22, 15, 35),
+        Tertiary    = Color3.fromRGB(30, 20, 45),
+        Accent      = Color3.fromRGB(170, 60, 255),
+        AccentDark  = Color3.fromRGB(110, 30, 200),
+        AccentLight = Color3.fromRGB(220, 130, 255),
+        Border      = Color3.fromRGB(90, 40, 140),
+        ToggleOn    = Color3.fromRGB(170, 60, 255),
+        ToggleOff   = Color3.fromRGB(40, 25, 60),
+    },
+    ["Coral Neon"] = {
+        Background  = Color3.fromRGB(20, 8, 12),
+        Secondary   = Color3.fromRGB(30, 12, 18),
+        Tertiary    = Color3.fromRGB(40, 18, 24),
+        Accent      = Color3.fromRGB(255, 75, 110),
+        AccentDark  = Color3.fromRGB(180, 30, 70),
+        AccentLight = Color3.fromRGB(255, 140, 170),
+        Border      = Color3.fromRGB(150, 40, 70),
+        ToggleOn    = Color3.fromRGB(255, 75, 110),
+        ToggleOff   = Color3.fromRGB(60, 20, 30),
+    },
+    ["Mint Neon"] = {
+        Background  = Color3.fromRGB(8, 18, 16),
+        Secondary   = Color3.fromRGB(12, 26, 22),
+        Tertiary    = Color3.fromRGB(16, 35, 30),
+        Accent      = Color3.fromRGB(0, 220, 160),
+        AccentDark  = Color3.fromRGB(0, 150, 110),
+        AccentLight = Color3.fromRGB(80, 255, 200),
+        Border      = Color3.fromRGB(0, 120, 90),
+        ToggleOn    = Color3.fromRGB(0, 220, 160),
+        ToggleOff   = Color3.fromRGB(10, 50, 40),
+    },
+    ["Ocean Blue"] = {
+        Background  = Color3.fromRGB(8, 14, 25),
+        Secondary   = Color3.fromRGB(12, 22, 40),
+        Tertiary    = Color3.fromRGB(16, 30, 55),
+        Accent      = Color3.fromRGB(50, 150, 255),
+        AccentDark  = Color3.fromRGB(20, 80, 200),
+        AccentLight = Color3.fromRGB(120, 200, 255),
+        Border      = Color3.fromRGB(30, 90, 180),
+        ToggleOn    = Color3.fromRGB(50, 150, 255),
+        ToggleOff   = Color3.fromRGB(15, 35, 75),
+    },
+    ["Sunset"] = {
+        Background  = Color3.fromRGB(20, 10, 5),
+        Secondary   = Color3.fromRGB(30, 15, 8),
+        Tertiary    = Color3.fromRGB(40, 22, 12),
+        Accent      = Color3.fromRGB(255, 130, 30),
+        AccentDark  = Color3.fromRGB(200, 70, 10),
+        AccentLight = Color3.fromRGB(255, 190, 80),
+        Border      = Color3.fromRGB(160, 70, 20),
+        ToggleOn    = Color3.fromRGB(255, 130, 30),
+        ToggleOff   = Color3.fromRGB(60, 25, 10),
+    },
+    ["Monochrome"] = {
+        Background  = Color3.fromRGB(10, 10, 10),
+        Secondary   = Color3.fromRGB(18, 18, 18),
+        Tertiary    = Color3.fromRGB(26, 26, 26),
+        Accent      = Color3.fromRGB(200, 200, 200),
+        AccentDark  = Color3.fromRGB(120, 120, 120),
+        AccentLight = Color3.fromRGB(240, 240, 240),
+        Border      = Color3.fromRGB(80, 80, 80),
+        ToggleOn    = Color3.fromRGB(200, 200, 200),
+        ToggleOff   = Color3.fromRGB(40, 40, 40),
+    },
+}
+
+-- Aplica un tema al Theme global y a todos los hubs activos
+function AlchemyLib.ApplyTheme(presetName)
+    local preset = AlchemyLib.ThemePresets[presetName]
+    if not preset then
+        warn("[AlchemyLib] Tema no encontrado: " .. tostring(presetName))
+        return
+    end
+    for k, v in pairs(preset) do
+        AlchemyLib.Theme[k] = v
+    end
+    -- Sync local alias
+    for k, v in pairs(AlchemyLib.Theme) do Theme[k] = v end
+end
 
 -- ══════════════════════════════════════
 --    COMPONENTES UI
@@ -478,6 +564,604 @@ function AlchemyLib.CreateTextBox(parent, labelText, placeholder, callback)
 end
 
 -- ══════════════════════════════════════
+--    COLOR PICKER (Fase 4)
+-- ══════════════════════════════════════
+-- AlchemyLib.CreateColorPicker(parent, label, defaultColor, callback)
+-- callback(Color3)
+function AlchemyLib.CreateColorPicker(parent, label, defaultColor, callback)
+    local color = defaultColor or Color3.fromRGB(170, 60, 255)
+    local r, g, b = math.floor(color.R * 255), math.floor(color.G * 255), math.floor(color.B * 255)
+
+    local holder = Instance.new("Frame")
+    holder.Size = UDim2.new(1, -16, 0, 148)
+    holder.BackgroundColor3 = Theme.Tertiary
+    holder.BackgroundTransparency = 0.15
+    holder.BorderSizePixel = 0
+    holder.Parent = parent
+    CreateCorner(holder, 10)
+    CreateStroke(holder, Theme.Border, 1.5)
+
+    -- Header
+    local headerLabel = Instance.new("TextLabel")
+    headerLabel.Size = UDim2.new(1, -80, 0, 28)
+    headerLabel.Position = UDim2.new(0, 10, 0, 6)
+    headerLabel.BackgroundTransparency = 1
+    headerLabel.Text = label
+    headerLabel.TextSize = 13
+    headerLabel.Font = Theme.FontLight
+    headerLabel.TextColor3 = Theme.TextDim
+    headerLabel.TextXAlignment = Enum.TextXAlignment.Left
+    headerLabel.Parent = holder
+
+    -- Preview swatch (cuadrado de color)
+    local swatch = Instance.new("Frame")
+    swatch.Name = "ColorSwatch"
+    swatch.Size = UDim2.new(0, 54, 0, 26)
+    swatch.Position = UDim2.new(1, -62, 0, 7)
+    swatch.BackgroundColor3 = color
+    swatch.BorderSizePixel = 0
+    swatch.Parent = holder
+    CreateCorner(swatch, 6)
+    CreateStroke(swatch, Theme.Border, 1)
+
+    local hexLabel = Instance.new("TextLabel")
+    hexLabel.Size = UDim2.new(0, 54, 0, 14)
+    hexLabel.Position = UDim2.new(1, -62, 0, 33)
+    hexLabel.BackgroundTransparency = 1
+    hexLabel.TextSize = 10
+    hexLabel.Font = Theme.FontLight
+    hexLabel.TextColor3 = Theme.TextDim
+    hexLabel.TextXAlignment = Enum.TextXAlignment.Center
+    hexLabel.Parent = holder
+
+    local function UpdateColor()
+        local c = Color3.fromRGB(r, g, b)
+        swatch.BackgroundColor3 = c
+        Tween(swatch, {BackgroundColor3 = c}, 0.1)
+        hexLabel.Text = ("#%02X%02X%02X"):format(r, g, b)
+        if callback then callback(c) end
+    end
+
+    local function makeSlider(labelStr, getVal, setVal, yPos, colr)
+        local rowLabel = Instance.new("TextLabel")
+        rowLabel.Size = UDim2.new(0, 14, 0, 22)
+        rowLabel.Position = UDim2.new(0, 10, 0, yPos)
+        rowLabel.BackgroundTransparency = 1
+        rowLabel.Text = labelStr
+        rowLabel.TextSize = 11
+        rowLabel.Font = Theme.Font
+        rowLabel.TextColor3 = colr
+        rowLabel.TextXAlignment = Enum.TextXAlignment.Left
+        rowLabel.Parent = holder
+
+        local track = Instance.new("Frame")
+        track.Size = UDim2.new(1, -100, 0, 6)
+        track.Position = UDim2.new(0, 24, 0, yPos + 8)
+        track.BackgroundColor3 = Color3.fromRGB(30, 20, 45)
+        track.BorderSizePixel = 0
+        track.Parent = holder
+        CreateCorner(track, 3)
+
+        local fill = Instance.new("Frame")
+        fill.Size = UDim2.new(getVal() / 255, 0, 1, 0)
+        fill.BackgroundColor3 = colr
+        fill.BorderSizePixel = 0
+        fill.Parent = track
+        CreateCorner(fill, 3)
+
+        local valLabel = Instance.new("TextLabel")
+        valLabel.Size = UDim2.new(0, 32, 0, 22)
+        valLabel.Position = UDim2.new(1, -68, 0, yPos)
+        valLabel.BackgroundTransparency = 1
+        valLabel.Text = tostring(getVal())
+        valLabel.TextSize = 11
+        valLabel.Font = Theme.Font
+        valLabel.TextColor3 = Theme.TextDim
+        valLabel.TextXAlignment = Enum.TextXAlignment.Center
+        valLabel.Parent = holder
+
+        -- Knob (botón draggable sobre el track)
+        local knob = Instance.new("Frame")
+        knob.Size = UDim2.new(0, 14, 0, 14)
+        knob.Position = UDim2.new(getVal() / 255, -7, 0.5, -7)
+        knob.BackgroundColor3 = Theme.Text
+        knob.BorderSizePixel = 0
+        knob.ZIndex = 3
+        knob.Parent = track
+        CreateCorner(knob, 7)
+        CreateStroke(knob, colr, 2)
+
+        -- Drag logic
+        local dragging = false
+        knob.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+        end)
+        knob.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+        track.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local abs = track.AbsolutePosition
+                local absSize = track.AbsoluteSize
+                local relX = math.clamp((input.Position.X - abs.X) / absSize.X, 0, 1)
+                local val = math.floor(relX * 255)
+                setVal(val)
+                fill.Size = UDim2.new(relX, 0, 1, 0)
+                knob.Position = UDim2.new(relX, -7, 0.5, -7)
+                valLabel.Text = tostring(val)
+                UpdateColor()
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+    end
+
+    makeSlider("R", function() return r end, function(v) r = v end, 46, Color3.fromRGB(255, 80, 80))
+    makeSlider("G", function() return g end, function(v) g = v end, 82, Color3.fromRGB(80, 220, 80))
+    makeSlider("B", function() return b end, function(v) b = v end, 118, Color3.fromRGB(80, 140, 255))
+
+    -- Init hex
+    hexLabel.Text = ("#%02X%02X%02X"):format(r, g, b)
+
+    return holder, function() return Color3.fromRGB(r, g, b) end
+end
+
+-- ══════════════════════════════════════
+--    PANEL FLOTANTE DRAGGABLE (Fase 4)
+-- ══════════════════════════════════════
+-- AlchemyLib.CreateFloatingPanel(title, width, height)
+-- Devuelve: panelFrame (con :AddContent(element))
+function AlchemyLib.CreateFloatingPanel(title, width, height, guiParent)
+    width = width or 280
+    height = height or 320
+    guiParent = guiParent or GetGuiParent()
+
+    -- ScreenGui contenedor
+    local panelGui = Instance.new("ScreenGui")
+    panelGui.Name = "AlchemyFloating_" .. title:gsub("%s","")
+    panelGui.ResetOnSpawn = false
+    pcall(function() panelGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling end)
+    panelGui.Parent = guiParent
+
+    -- Panel raíz
+    local panel = Instance.new("Frame")
+    panel.Name = "FloatingPanel"
+    panel.Size = UDim2.new(0, width, 0, height)
+    panel.Position = UDim2.new(0.5, -width/2, 0.5, -height/2)
+    panel.BackgroundColor3 = Theme.Background
+    panel.BackgroundTransparency = 0.08
+    panel.BorderSizePixel = 0
+    panel.Parent = panelGui
+    CreateCorner(panel, 12)
+    CreateStroke(panel, Theme.Accent, 1.5)
+    AlchemyLib.CreateShadow(panel)
+
+    -- Header draggable
+    local panelHeader = Instance.new("Frame")
+    panelHeader.Name = "Header"
+    panelHeader.Size = UDim2.new(1, 0, 0, 38)
+    panelHeader.BackgroundColor3 = Theme.Secondary
+    panelHeader.BackgroundTransparency = 0.3
+    panelHeader.BorderSizePixel = 0
+    panelHeader.ZIndex = 2
+    panelHeader.Parent = panel
+    CreateCorner(panelHeader, 12)
+
+    local panelTitle = Instance.new("TextLabel")
+    panelTitle.Size = UDim2.new(1, -48, 1, 0)
+    panelTitle.Position = UDim2.new(0, 12, 0, 0)
+    panelTitle.BackgroundTransparency = 1
+    panelTitle.Text = title
+    panelTitle.TextSize = 14
+    panelTitle.Font = Theme.Font
+    panelTitle.TextColor3 = Theme.Text
+    panelTitle.TextXAlignment = Enum.TextXAlignment.Left
+    panelTitle.ZIndex = 2
+    panelTitle.Parent = panelHeader
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 26, 0, 26)
+    closeBtn.Position = UDim2.new(1, -32, 0.5, -13)
+    closeBtn.BackgroundColor3 = Theme.Danger
+    closeBtn.BackgroundTransparency = 0.6
+    closeBtn.Text = "×"
+    closeBtn.TextSize = 16
+    closeBtn.Font = Theme.Font
+    closeBtn.TextColor3 = Theme.Text
+    closeBtn.ZIndex = 3
+    closeBtn.Parent = panelHeader
+    CreateCorner(closeBtn, 6)
+    closeBtn.MouseButton1Click:Connect(function()
+        Tween(panel, {BackgroundTransparency = 1, Size = UDim2.new(0, width * 0.8, 0, height * 0.8)}, 0.2)
+        task.delay(0.22, function() pcall(function() panelGui:Destroy() end) end)
+    end)
+
+    -- Separador
+    local sep = Instance.new("Frame")
+    sep.Size = UDim2.new(1, -16, 0, 1)
+    sep.Position = UDim2.new(0, 8, 0, 38)
+    sep.BackgroundColor3 = Theme.Accent
+    sep.BackgroundTransparency = 0.5
+    sep.BorderSizePixel = 0
+    sep.Parent = panel
+
+    -- Scroll content
+    local content = Instance.new("ScrollingFrame")
+    content.Name = "Content"
+    content.Size = UDim2.new(1, 0, 1, -46)
+    content.Position = UDim2.new(0, 0, 0, 46)
+    content.BackgroundTransparency = 1
+    content.BorderSizePixel = 0
+    content.ScrollBarThickness = 3
+    content.ScrollBarImageColor3 = Theme.AccentLight
+    content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    content.CanvasSize = UDim2.new(0, 0, 0, 0)
+    content.Parent = panel
+
+    local contentLayout = Instance.new("UIListLayout")
+    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    contentLayout.Padding = UDim.new(0, 6)
+    contentLayout.Parent = content
+
+    local contentPad = Instance.new("UIPadding")
+    contentPad.PaddingTop = UDim.new(0, 8)
+    contentPad.PaddingLeft = UDim.new(0, 8)
+    contentPad.PaddingRight = UDim.new(0, 8)
+    contentPad.PaddingBottom = UDim.new(0, 8)
+    contentPad.Parent = content
+
+    -- Dragging
+    local dragToggle, dragInput, dragStart, startPos = nil, nil, nil, nil
+    panelHeader.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragToggle = true; dragStart = input.Position; startPos = panel.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragToggle = false end end)
+        end
+    end)
+    panelHeader.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragToggle then
+            local delta = input.Position - dragStart
+            panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    -- Animación de entrada
+    panel.Size = UDim2.new(0, 0, 0, 0)
+    panel.BackgroundTransparency = 1
+    Tween(panel, {Size = UDim2.new(0, width, 0, height), BackgroundTransparency = 0.08}, 0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+    local API = {Frame = panel, Content = content, Gui = panelGui}
+    function API:Destroy() pcall(function() panelGui:Destroy() end) end
+    return API
+end
+
+-- ══════════════════════════════════════
+--    SISTEMA DE IDIOMA / I18n (Fase 4)
+-- ══════════════════════════════════════
+AlchemyLib.Languages = {
+    ["Español"] = {
+        -- Tabs
+        ["Combat"]        = "Combate",
+        ["Visual"]        = "Visual",
+        ["Movement"]      = "Movimiento",
+        ["Player"]        = "Jugador",
+        ["Utilities"]     = "Utilidades",
+        ["World"]         = "Mundo",
+        ["Server"]        = "Servidor",
+        ["Shaders"]       = "Shaders",
+        ["Animations"]    = "Animaciones",
+        ["Misc"]          = "Varios",
+        ["Scripts"]       = "Scripts",
+        ["Configuration"] = "Configuración",
+        -- Secciones comunes
+        ["SPEED"]         = "VELOCIDAD",
+        ["FLY"]           = "VUELO",
+        ["JUMP"]          = "SALTO",
+        ["MISC"]          = "MISC",
+        ["PERSONAJE"]     = "PERSONAJE",
+        ["VEHICULOS"]     = "VEHÍCULOS",
+        -- Elementos
+        ["Speed Hack"]    = "Speed Hack",
+        ["Fly"]           = "Volar",
+        ["Noclip"]        = "Noclip",
+        ["Infinite Jump"] = "Salto Infinito",
+        ["God Mode (Client)"] = "Modo Dios",
+    },
+    ["English"] = {
+        ["Combat"]        = "Combat",
+        ["Visual"]        = "Visual",
+        ["Movement"]      = "Movement",
+        ["Player"]        = "Player",
+        ["Utilities"]     = "Utilities",
+        ["World"]         = "World",
+        ["Server"]        = "Server",
+        ["Shaders"]       = "Shaders",
+        ["Animations"]    = "Animations",
+        ["Misc"]          = "Misc",
+        ["Scripts"]       = "Scripts",
+        ["Configuration"] = "Configuration",
+        ["SPEED"]         = "SPEED",
+        ["FLY"]           = "FLY",
+        ["JUMP"]          = "JUMP",
+        ["MISC"]          = "MISC",
+        ["PERSONAJE"]     = "CHARACTER",
+        ["VEHICULOS"]     = "VEHICLES",
+        ["Speed Hack"]    = "Speed Hack",
+        ["Fly"]           = "Fly",
+        ["Noclip"]        = "Noclip",
+        ["Infinite Jump"] = "Infinite Jump",
+        ["God Mode (Client)"] = "God Mode",
+    },
+    ["Português"] = {
+        ["Combat"]        = "Combate",
+        ["Visual"]        = "Visual",
+        ["Movement"]      = "Movimento",
+        ["Player"]        = "Jogador",
+        ["Utilities"]     = "Utilidades",
+        ["World"]         = "Mundo",
+        ["Server"]        = "Servidor",
+        ["Shaders"]       = "Shaders",
+        ["Animations"]    = "Animações",
+        ["Misc"]          = "Diversos",
+        ["Scripts"]       = "Scripts",
+        ["Configuration"] = "Configuração",
+        ["SPEED"]         = "VELOCIDADE",
+        ["FLY"]           = "VOAR",
+        ["JUMP"]          = "PULAR",
+        ["MISC"]          = "MISC",
+        ["PERSONAJE"]     = "PERSONAGEM",
+        ["VEHICULOS"]     = "VEÍCULOS",
+        ["Speed Hack"]    = "Speed Hack",
+        ["Fly"]           = "Voar",
+        ["Noclip"]        = "Noclip",
+        ["Infinite Jump"] = "Pulo Infinito",
+        ["God Mode (Client)"] = "Modo Deus",
+    },
+}
+
+AlchemyLib._currentLang = "Español"
+
+-- Traduce un string; devuelve original si no hay traducción
+function AlchemyLib.T(key)
+    local dict = AlchemyLib.Languages[AlchemyLib._currentLang]
+    if dict and dict[key] then return dict[key] end
+    return key
+end
+
+-- Aplica un idioma: modifica _currentLang
+-- La traducción es on-demand via AlchemyLib.T()
+function AlchemyLib.SetLanguage(langName)
+    if AlchemyLib.Languages[langName] then
+        AlchemyLib._currentLang = langName
+        print("[AlchemyLib] Idioma cambiado a: " .. langName)
+    else
+        warn("[AlchemyLib] Idioma no encontrado: " .. langName)
+    end
+end
+
+-- ══════════════════════════════════════
+--    DROPDOWN (MENÚ DESPLEGABLE)
+-- ══════════════════════════════════════
+-- AlchemyLib.CreateDropdown(parent, label, options, default, callback)
+-- options = {"Opcion1", "Opcion2", ...}
+-- callback(selectedString)
+function AlchemyLib.CreateDropdown(parent, label, options, default, callback)
+    local selected = default or options[1] or ""
+    local isOpen = false
+
+    -- Contenedor externo (crece al abrir)
+    local holder = Instance.new("Frame")
+    holder.Size = UDim2.new(1, -16, 0, 44)
+    holder.BackgroundColor3 = Theme.Tertiary
+    holder.BackgroundTransparency = 0.2
+    holder.BorderSizePixel = 0
+    holder.ClipsDescendants = false
+    holder.Parent = parent
+    CreateCorner(holder, 8)
+    CreateStroke(holder, Theme.Border, 1.5)
+
+    -- Header (siempre visible)
+    local header = Instance.new("TextButton")
+    header.Size = UDim2.new(1, 0, 0, 44)
+    header.BackgroundTransparency = 1
+    header.Text = ""
+    header.Parent = holder
+
+    local headerLabel = Instance.new("TextLabel")
+    headerLabel.Size = UDim2.new(1, -50, 1, 0)
+    headerLabel.Position = UDim2.new(0, 12, 0, 0)
+    headerLabel.BackgroundTransparency = 1
+    headerLabel.Text = label
+    headerLabel.TextSize = 13
+    headerLabel.Font = Theme.FontLight
+    headerLabel.TextColor3 = Theme.TextDim
+    headerLabel.TextXAlignment = Enum.TextXAlignment.Left
+    headerLabel.Parent = header
+
+    local selectedLabel = Instance.new("TextLabel")
+    selectedLabel.Size = UDim2.new(1, -100, 1, 0)
+    selectedLabel.Position = UDim2.new(0, 85, 0, 0)
+    selectedLabel.BackgroundTransparency = 1
+    selectedLabel.Text = selected
+    selectedLabel.TextSize = 13
+    selectedLabel.Font = Theme.Font
+    selectedLabel.TextColor3 = Theme.Text
+    selectedLabel.TextXAlignment = Enum.TextXAlignment.Left
+    selectedLabel.Parent = header
+
+    -- Flecha indicadora
+    local arrow = Instance.new("TextLabel")
+    arrow.Size = UDim2.new(0, 30, 1, 0)
+    arrow.Position = UDim2.new(1, -36, 0, 0)
+    arrow.BackgroundTransparency = 1
+    arrow.Text = "▾"
+    arrow.TextSize = 16
+    arrow.Font = Theme.Font
+    arrow.TextColor3 = Theme.AccentLight
+    arrow.Parent = header
+
+    -- Panel desplegable (flota SOBRE el resto de la UI)
+    local dropFrame = Instance.new("Frame")
+    dropFrame.Name = "DropPanel"
+    dropFrame.Size = UDim2.new(1, 0, 0, 0) -- empieza cerrado
+    dropFrame.Position = UDim2.new(0, 0, 0, 44)
+    dropFrame.BackgroundColor3 = Theme.Secondary
+    dropFrame.BackgroundTransparency = 0.05
+    dropFrame.BorderSizePixel = 0
+    dropFrame.ClipsDescendants = true
+    dropFrame.ZIndex = 10
+    dropFrame.Visible = false
+    dropFrame.Parent = holder
+    CreateCorner(dropFrame, 8)
+    CreateStroke(dropFrame, Theme.Accent, 1)
+
+    -- SearchBox dentro del dropdown
+    local searchBox = Instance.new("TextBox")
+    searchBox.Size = UDim2.new(1, -16, 0, 28)
+    searchBox.Position = UDim2.new(0, 8, 0, 6)
+    searchBox.BackgroundColor3 = Theme.Background
+    searchBox.BackgroundTransparency = 0.3
+    searchBox.BorderSizePixel = 0
+    searchBox.Text = ""
+    searchBox.PlaceholderText = "🔍 Buscar..."
+    searchBox.TextSize = 12
+    searchBox.Font = Theme.FontLight
+    searchBox.TextColor3 = Theme.Text
+    searchBox.PlaceholderColor3 = Theme.TextDim
+    searchBox.ClearTextOnFocus = false
+    searchBox.ZIndex = 11
+    searchBox.Parent = dropFrame
+    CreateCorner(searchBox, 6)
+
+    -- Scroll para opciones
+    local optScroll = Instance.new("ScrollingFrame")
+    optScroll.Size = UDim2.new(1, 0, 1, -42)
+    optScroll.Position = UDim2.new(0, 0, 0, 40)
+    optScroll.BackgroundTransparency = 1
+    optScroll.BorderSizePixel = 0
+    optScroll.ScrollBarThickness = 3
+    optScroll.ScrollBarImageColor3 = Theme.AccentLight
+    optScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    optScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    optScroll.ZIndex = 11
+    optScroll.Parent = dropFrame
+
+    local optLayout = Instance.new("UIListLayout")
+    optLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    optLayout.Padding = UDim.new(0, 2)
+    optLayout.Parent = optScroll
+
+    local optPad = Instance.new("UIPadding")
+    optPad.PaddingLeft = UDim.new(0, 6)
+    optPad.PaddingRight = UDim.new(0, 6)
+    optPad.PaddingTop = UDim.new(0, 4)
+    optPad.PaddingBottom = UDim.new(0, 4)
+    optPad.Parent = optScroll
+
+    local optButtons = {}
+
+    local function filterOptions(query)
+        query = query:lower()
+        for _, btn in pairs(optButtons) do
+            local match = query == "" or btn.Text:lower():find(query, 1, true)
+            btn.Visible = match ~= nil and match ~= false
+        end
+    end
+
+    local function buildOptions()
+        -- Limpiar previos
+        for _, b in pairs(optButtons) do b:Destroy() end
+        optButtons = {}
+        for i, opt in ipairs(options) do
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1, 0, 0, 30)
+            btn.BackgroundColor3 = opt == selected and Theme.Accent or Theme.Tertiary
+            btn.BackgroundTransparency = opt == selected and 0.4 or 0.6
+            btn.Text = opt
+            btn.TextSize = 13
+            btn.Font = opt == selected and Theme.Font or Theme.FontLight
+            btn.TextColor3 = opt == selected and Theme.Text or Theme.TextDim
+            btn.BorderSizePixel = 0
+            btn.LayoutOrder = i
+            btn.ZIndex = 12
+            btn.Parent = optScroll
+            CreateCorner(btn, 6)
+            table.insert(optButtons, btn)
+
+            btn.MouseEnter:Connect(function()
+                if opt ~= selected then
+                    Tween(btn, {BackgroundTransparency = 0.3, TextColor3 = Theme.Text}, 0.15)
+                end
+            end)
+            btn.MouseLeave:Connect(function()
+                if opt ~= selected then
+                    Tween(btn, {BackgroundTransparency = 0.6, TextColor3 = Theme.TextDim}, 0.15)
+                end
+            end)
+            btn.MouseButton1Click:Connect(function()
+                selected = opt
+                selectedLabel.Text = opt
+                Ripple(btn)
+                -- Reset all buttons
+                for _, b2 in pairs(optButtons) do
+                    local isThis = (b2.Text == opt)
+                    Tween(b2, {
+                        BackgroundColor3 = isThis and Theme.Accent or Theme.Tertiary,
+                        BackgroundTransparency = isThis and 0.4 or 0.6,
+                        TextColor3 = isThis and Theme.Text or Theme.TextDim,
+                    }, 0.2)
+                    b2.Font = isThis and Theme.Font or Theme.FontLight
+                end
+                -- Cerrar dropdown
+                isOpen = false
+                Tween(arrow, {Rotation = 0}, 0.25)
+                Tween(dropFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.25, Enum.EasingStyle.Quart)
+                task.delay(0.25, function() pcall(function() dropFrame.Visible = false end) end)
+                if callback then callback(opt) end
+            end)
+        end
+    end
+
+    buildOptions()
+
+    searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        filterOptions(searchBox.Text)
+    end)
+
+    -- Altura del dropdown: max 180px para 5-6 opciones
+    local dropH = math.clamp(#options * 32 + 50, 80, 190)
+
+    header.MouseButton1Click:Connect(function()
+        isOpen = not isOpen
+        Ripple(header)
+        if isOpen then
+            buildOptions()
+            filterOptions(searchBox.Text)
+            dropFrame.Visible = true
+            dropFrame.Size = UDim2.new(1, 0, 0, 0)
+            Tween(arrow, {Rotation = 180}, 0.25)
+            Tween(dropFrame, {Size = UDim2.new(1, 0, 0, dropH)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+        else
+            Tween(arrow, {Rotation = 0}, 0.25)
+            Tween(dropFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.25, Enum.EasingStyle.Quart)
+            task.delay(0.25, function() pcall(function() dropFrame.Visible = false end) end)
+        end
+    end)
+
+    header.MouseEnter:Connect(function() Tween(holder, {BackgroundTransparency = 0, BackgroundColor3 = Theme.Secondary}, 0.2) end)
+    header.MouseLeave:Connect(function() Tween(holder, {BackgroundTransparency = 0.2, BackgroundColor3 = Theme.Tertiary}, 0.2) end)
+
+    return holder, function() return selected end
+end
+
+-- ══════════════════════════════════════
 --     SISTEMA DE VENTANA COMPLETO
 -- ══════════════════════════════════════
 function AlchemyLib:CreateHub(config)
@@ -619,7 +1303,7 @@ function AlchemyLib:CreateHub(config)
     AuthorLabel.TextXAlignment = Enum.TextXAlignment.Left
     AuthorLabel.Parent = TitleBar
 
-    -- Botones ventana
+    -- ══ BOTONES VENTANA ══
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 32, 0, 32)
     CloseBtn.Position = UDim2.new(1, -45, 0.5, -16)
@@ -649,6 +1333,87 @@ function AlchemyLib:CreateHub(config)
     CloseBtn.MouseLeave:Connect(function() Tween(CloseBtn, {BackgroundTransparency = 0.8}, 0.2) end)
     MinBtn.MouseEnter:Connect(function() Tween(MinBtn, {BackgroundTransparency = 0.3}, 0.2) end)
     MinBtn.MouseLeave:Connect(function() Tween(MinBtn, {BackgroundTransparency = 0.8}, 0.2) end)
+
+    -- ══ SEARCH BAR (Botón Lupa) ══
+    -- Al presionar la lupa, aparece una barra de búsqueda que filtra
+    -- los tabs del sidebar en tiempo real.
+    local SearchBtn = Instance.new("TextButton")
+    SearchBtn.Size = UDim2.new(0, 32, 0, 32)
+    SearchBtn.Position = UDim2.new(1, -125, 0.5, -16)
+    SearchBtn.BackgroundColor3 = Theme.Accent
+    SearchBtn.BackgroundTransparency = 0.8
+    SearchBtn.Text = "🔍"
+    SearchBtn.TextSize = 15
+    SearchBtn.Font = Theme.Font
+    SearchBtn.TextColor3 = Theme.Text
+    SearchBtn.ZIndex = 3
+    SearchBtn.Parent = TitleBar
+    CreateCorner(SearchBtn, 8)
+    SearchBtn.MouseEnter:Connect(function() Tween(SearchBtn, {BackgroundTransparency = 0.3}, 0.2) end)
+    SearchBtn.MouseLeave:Connect(function() Tween(SearchBtn, {BackgroundTransparency = 0.8}, 0.2) end)
+
+    -- Barra de búsqueda (oculta por defecto, aparece debajo del TitleBar)
+    local SearchBar = Instance.new("Frame")
+    SearchBar.Name = "SearchBar"
+    SearchBar.Size = UDim2.new(1, -176, 0, 0) -- empieza colapsada
+    SearchBar.Position = UDim2.new(0, 8, 0, 51)
+    SearchBar.BackgroundColor3 = Theme.Secondary
+    SearchBar.BackgroundTransparency = 0.1
+    SearchBar.BorderSizePixel = 0
+    SearchBar.ClipsDescendants = true
+    SearchBar.ZIndex = 5
+    SearchBar.Visible = false
+    SearchBar.Parent = MainFrame
+    CreateCorner(SearchBar, 8)
+    CreateStroke(SearchBar, Theme.Accent, 1)
+
+    local SearchInput = Instance.new("TextBox")
+    SearchInput.Size = UDim2.new(1, -12, 1, -8)
+    SearchInput.Position = UDim2.new(0, 6, 0, 4)
+    SearchInput.BackgroundTransparency = 1
+    SearchInput.Text = ""
+    SearchInput.PlaceholderText = "Buscar hack o tab..."
+    SearchInput.TextSize = 13
+    SearchInput.Font = Theme.FontLight
+    SearchInput.TextColor3 = Theme.Text
+    SearchInput.PlaceholderColor3 = Theme.TextDim
+    SearchInput.ClearTextOnFocus = false
+    SearchInput.ZIndex = 6
+    SearchInput.Parent = SearchBar
+
+    local searchOpen = false
+    SearchBtn.MouseButton1Click:Connect(function()
+        searchOpen = not searchOpen
+        Ripple(SearchBtn)
+        if searchOpen then
+            SearchBar.Visible = true
+            Tween(SearchBtn, {BackgroundColor3 = Theme.Accent, BackgroundTransparency = 0.2}, 0.2)
+            Tween(SearchBar, {Size = UDim2.new(1, -176, 0, 34)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+            task.delay(0.3, function() pcall(function() SearchInput:CaptureFocus() end) end)
+        else
+            SearchInput.Text = ""
+            Tween(SearchBtn, {BackgroundColor3 = Theme.Accent, BackgroundTransparency = 0.8}, 0.2)
+            Tween(SearchBar, {Size = UDim2.new(1, -176, 0, 0)}, 0.2, Enum.EasingStyle.Quart)
+            task.delay(0.2, function() pcall(function() SearchBar.Visible = false end) end)
+            -- Mostrar todos los tabs de nuevo
+            for _, btn in pairs(Hub.TabButtons) do btn.Visible = true end
+        end
+    end)
+
+    -- Filtrar tabs al escribir
+    SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
+        local q = SearchInput.Text:lower()
+        if q == "" then
+            for _, btn in pairs(Hub.TabButtons) do btn.Visible = true end
+        else
+            for name, btn in pairs(Hub.TabButtons) do
+                btn.Visible = name:lower():find(q, 1, true) ~= nil
+            end
+        end
+    end)
+
+    Hub.SearchBar = SearchBar
+    Hub.SearchInput = SearchInput
 
     -- Linea separadora
     local TitleLine = Instance.new("Frame")
