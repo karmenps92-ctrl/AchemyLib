@@ -1402,6 +1402,27 @@ function AlchemyLib:CreateHub(config)
     SearchBtn.MouseEnter:Connect(function() Tween(SearchBtn, {BackgroundTransparency = 0.3}, 0.2) end)
     SearchBtn.MouseLeave:Connect(function() Tween(SearchBtn, {BackgroundTransparency = 0.8}, 0.2) end)
 
+    -- ══ SETTINGS BAR (Botón Engranaje) ══
+    local SettingsBtn = Instance.new("TextButton")
+    SettingsBtn.Size = UDim2.new(0, 32, 0, 32)
+    SettingsBtn.Position = UDim2.new(1, -165, 0.5, -16)
+    SettingsBtn.BackgroundColor3 = Theme.Accent
+    SettingsBtn.BackgroundTransparency = 0.8
+    SettingsBtn.Text = "⚙️"
+    SettingsBtn.TextSize = 15
+    SettingsBtn.Font = Theme.Font
+    SettingsBtn.TextColor3 = Theme.Text
+    SettingsBtn.ZIndex = 3
+    SettingsBtn.Parent = TitleBar
+    CreateCorner(SettingsBtn, 8)
+    SettingsBtn.MouseEnter:Connect(function() Tween(SettingsBtn, {BackgroundTransparency = 0.3}, 0.2) end)
+    SettingsBtn.MouseLeave:Connect(function() Tween(SettingsBtn, {BackgroundTransparency = 0.8}, 0.2) end)
+    SettingsBtn.MouseButton1Click:Connect(function()
+        BumpyTween(SettingsBtn)
+        self:SwitchTab("Configuration")
+    end)
+
+
     -- Barra de búsqueda (Flotante por encima del menú en v4.2.1)
     local SearchBar = Instance.new("Frame")
     SearchBar.Name = "SearchBar"
