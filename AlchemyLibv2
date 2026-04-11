@@ -1,7 +1,7 @@
 --[[
     ╔═══════════════════════════════════════════════════╗
     ║                 🧪 ALCHEMY LIB 🧪                 ║
-    ║         Professional OOP UI Engine v6.0           ║
+    ║         Professional OOP UI Engine v6.1           ║
     ║      Independent, Enterprise-Grade Framework      ║
     ╚═══════════════════════════════════════════════════╝
 ]]
@@ -69,27 +69,108 @@ function Alchemy:Destroy()
     table.clear(ValidInstances)
 end
 
+-- Notification System
+function Alchemy:Notify(options)
+    options = options or {}
+    local Title = options.Title or "Notification"
+    local Content = options.Content or "This is a notification."
+    local Duration = options.Duration or 6.5
+    local Color = options.Color or Color3.fromRGB(170, 60, 255)
+
+    -- Detect or Create Notification Container
+    local NotifGui = GetGuiParent():FindFirstChild("AlchemyNotifications")
+    if not NotifGui then
+        NotifGui = Instance.new("ScreenGui")
+        NotifGui.Name = "AlchemyNotifications"
+        NotifGui.ResetOnSpawn = false
+        NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        NotifGui.Parent = GetGuiParent()
+        table.insert(ValidInstances, NotifGui)
+
+        local Container = Instance.new("Frame")
+        Container.Name = "Container"
+        Container.Size = UDim2.new(0, 300, 1, -20)
+        Container.Position = UDim2.new(1, -320, 0, 20)
+        Container.BackgroundTransparency = 1
+        Container.Parent = NotifGui
+
+        local ListLayout = Instance.new("UIListLayout")
+        ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        ListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+        ListLayout.Padding = UDim.new(0, 10)
+        ListLayout.Parent = Container
+    end
+
+    local Container = NotifGui.Container
+
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, 0, 0, 0) -- Starts collapsed
+    Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    Frame.BackgroundTransparency = 0.1
+    Frame.ClipsDescendants = true
+    Frame.Parent = Container
+    Round(Frame, 8)
+
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = Color
+    Stroke.Thickness = 1.5
+    Stroke.Transparency = 0.5
+    Stroke.Parent = Frame
+
+    local TitleLbl = Instance.new("TextLabel")
+    TitleLbl.Size = UDim2.new(1, -20, 0, 25)
+    TitleLbl.Position = UDim2.new(0, 10, 0, 5)
+    TitleLbl.BackgroundTransparency = 1
+    TitleLbl.Text = Title
+    TitleLbl.TextColor3 = Color
+    TitleLbl.TextSize = 14
+    TitleLbl.Font = Enum.Font.GothamBold
+    TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLbl.Parent = Frame
+
+    local ContentLbl = Instance.new("TextLabel")
+    ContentLbl.Size = UDim2.new(1, -20, 1, -35)
+    ContentLbl.Position = UDim2.new(0, 10, 0, 30)
+    ContentLbl.BackgroundTransparency = 1
+    ContentLbl.Text = Content
+    ContentLbl.TextColor3 = Color3.fromRGB(220, 220, 220)
+    ContentLbl.TextSize = 12
+    ContentLbl.Font = Enum.Font.Gotham
+    ContentLbl.TextWrapped = true
+    ContentLbl.TextXAlignment = Enum.TextXAlignment.Left
+    ContentLbl.TextYAlignment = Enum.TextYAlignment.Top
+    ContentLbl.Parent = Frame
+
+    -- Calculate best size (approximate)
+    local reqHeight = 40 + (string.len(Content) / 40) * 15
+    if reqHeight < 70 then reqHeight = 70 end
+
+    -- Animate In
+    Tween(Frame, {Size = UDim2.new(1, 0, 0, reqHeight)}, 0.4, Enum.EasingStyle.Back)
+    
+    -- Lifetime handler
+    task.spawn(function()
+        task.wait(Duration)
+        if Frame and Frame.Parent then
+            Tween(Frame, {Size = UDim2.new(1, 0, 0, 0), BackgroundTransparency = 1}, 0.3)
+            task.wait(0.3)
+            Frame:Destroy()
+        end
+    end)
+end
+
 -- Core Window Creation
 function Alchemy:CreateWindow(options)
     options = options or {}
     local WindowName = options.Name or "Alchemy Hub"
     local WindowColor = options.Color or Color3.fromRGB(170, 60, 255)
     
-    -- Library Object
-    local Window = {
-        Tabs = {},
-        CurrentTab = nil,
-        Color = WindowColor
-    }
+    local Window = { Tabs = {}, CurrentTab = nil, Color = WindowColor }
     setmetatable(Window, Alchemy)
 
-    -- Security: Generate random name to prevent easy detection
     local SecretName = HttpService:GenerateGUID(false)
-
-    -- Nuke previous instances from this library
     self:Destroy()
 
-    -- GUI Construction
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = SecretName
     ScreenGui.ResetOnSpawn = false
@@ -97,7 +178,6 @@ function Alchemy:CreateWindow(options)
     ScreenGui.Parent = GetGuiParent()
     table.insert(ValidInstances, ScreenGui)
 
-    -- Glassmorphism Main Frame
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "Main"
     MainFrame.Size = UDim2.new(0, 600, 0, 420)
@@ -112,31 +192,24 @@ function Alchemy:CreateWindow(options)
     local Stroke = Instance.new("UIStroke")
     Stroke.Color = Color3.fromRGB(255, 255, 255)
     Stroke.Transparency = 0.85
-    Stroke.Thickness = 1
     Stroke.Parent = MainFrame
 
-    -- Dragging Logic
     local dragging, dragInput, dragStart, startPos
     AddConnection(MainFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = MainFrame.Position
-            
             input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
             end)
         end
     end))
-
     AddConnection(MainFrame.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
     end))
-
     AddConnection(UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
@@ -144,7 +217,6 @@ function Alchemy:CreateWindow(options)
         end
     end))
 
-    -- Title Bar
     local TitleBar = Instance.new("Frame")
     TitleBar.Size = UDim2.new(1, 0, 0, 40)
     TitleBar.BackgroundTransparency = 1
@@ -162,13 +234,67 @@ function Alchemy:CreateWindow(options)
     TitleLabel.Parent = TitleBar
 
     local TitleGlow = Instance.new("UIGradient")
-    TitleGlow.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, WindowColor),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-    })
+    TitleGlow.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, WindowColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)) })
     TitleGlow.Parent = TitleLabel
+    
+    local ButtonContainer = Instance.new("Frame")
+    ButtonContainer.Size = UDim2.new(0, 140, 1, 0)
+    ButtonContainer.Position = UDim2.new(1, -140, 0, 0)
+    ButtonContainer.BackgroundTransparency = 1
+    ButtonContainer.Parent = TitleBar
 
-    -- Sidebar (Tabs)
+    local BtnLayout = Instance.new("UIListLayout")
+    BtnLayout.FillDirection = Enum.FillDirection.Horizontal
+    BtnLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+    BtnLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    BtnLayout.Padding = UDim.new(0, 6)
+    BtnLayout.Parent = ButtonContainer
+
+    local BtnPadding = Instance.new("UIPadding")
+    BtnPadding.PaddingRight = UDim.new(0, 10)
+    BtnPadding.Parent = ButtonContainer
+
+    local function CreateTopBtn(text, color, iconSize)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0, 26, 0, 26)
+        btn.BackgroundColor3 = color
+        btn.BackgroundTransparency = 0.2
+        btn.Text = text
+        btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+        btn.TextSize = iconSize or 12
+        btn.Font = Enum.Font.GothamBold
+        btn.Parent = ButtonContainer
+        Round(btn, 6)
+        
+        local h, s, v = color:ToHSV()
+        local hoverColor = Color3.fromHSV(h, s, math.clamp(v + 0.2, 0, 1))
+
+        AddConnection(btn.MouseEnter:Connect(function() Tween(btn, {BackgroundColor3 = hoverColor, TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.2) end))
+        AddConnection(btn.MouseLeave:Connect(function() Tween(btn, {BackgroundColor3 = color, TextColor3 = Color3.fromRGB(220, 220, 220)}, 0.2) end))
+        return btn
+    end
+
+    local BtnSettings = CreateTopBtn("⚙", Color3.fromRGB(60, 40, 90), 14)
+    local BtnSearch   = CreateTopBtn("🔍", Color3.fromRGB(60, 40, 90), 12)
+    local BtnMinimize = CreateTopBtn("-", Color3.fromRGB(90, 70, 50), 16)
+    local BtnClose    = CreateTopBtn("X", Color3.fromRGB(120, 40, 50), 14)
+
+    AddConnection(BtnClose.MouseButton1Click:Connect(function()
+        Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 0), BackgroundTransparency = 1}, 0.3)
+        task.wait(0.3)
+        self:Destroy()
+    end))
+
+    local minimized = false
+    AddConnection(BtnMinimize.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        if minimized then Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 40)}, 0.3, Enum.EasingStyle.Exponential)
+        else Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 420)}, 0.3, Enum.EasingStyle.Exponential) end
+    end))
+
+    Window.SettingsButton = BtnSettings
+    Window.SearchButton = BtnSearch
+
     local Sidebar = Instance.new("Frame")
     Sidebar.Size = UDim2.new(0, 150, 1, -40)
     Sidebar.Position = UDim2.new(0, 0, 0, 40)
@@ -188,14 +314,12 @@ function Alchemy:CreateWindow(options)
     SidebarPadding.PaddingRight = UDim.new(0, 10)
     SidebarPadding.Parent = Sidebar
 
-    -- Content Area
     local ContentContainer = Instance.new("Frame")
     ContentContainer.Size = UDim2.new(1, -150, 1, -40)
     ContentContainer.Position = UDim2.new(0, 150, 0, 40)
     ContentContainer.BackgroundTransparency = 1
     ContentContainer.Parent = MainFrame
 
-    -- Methods for Window
     function Window:CreateTab(options)
         local TabName = options.Name or "Tab"
         
@@ -235,7 +359,6 @@ function Alchemy:CreateWindow(options)
             TabPage.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 20)
         end))
 
-        -- Tab Selection Logic
         AddConnection(TabButton.MouseButton1Click:Connect(function()
             for _, tab in pairs(Window.Tabs) do
                 tab.Page.Visible = false
@@ -246,7 +369,6 @@ function Alchemy:CreateWindow(options)
             Window.CurrentTab = TabName
         end))
 
-        -- Default selection
         if not Window.CurrentTab then
             TabPage.Visible = true
             TabButton.BackgroundTransparency = 0.8
@@ -257,7 +379,6 @@ function Alchemy:CreateWindow(options)
         local TabData = { Button = TabButton, Page = TabPage }
         table.insert(Window.Tabs, TabData)
 
-        -- Section Class
         local Tab = {}
         function Tab:CreateSection(sectionName)
             local SectionLabel = Instance.new("TextLabel")
@@ -272,6 +393,59 @@ function Alchemy:CreateWindow(options)
 
             local Section = {}
             
+            -- PARAGRAPH
+            function Section:CreateParagraph(opts)
+                local Title = opts.Title or "Paragraph"
+                local Content = opts.Content or "Content here."
+
+                local ParaFrame = Instance.new("Frame")
+                ParaFrame.Size = UDim2.new(1, 0, 0, 60)
+                ParaFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+                ParaFrame.BackgroundTransparency = 0.4
+                ParaFrame.Parent = TabPage
+                Round(ParaFrame, 6)
+
+                local TitleLbl = Instance.new("TextLabel")
+                TitleLbl.Size = UDim2.new(1, -20, 0, 20)
+                TitleLbl.Position = UDim2.new(0, 10, 0, 5)
+                TitleLbl.BackgroundTransparency = 1
+                TitleLbl.Text = Title
+                TitleLbl.TextColor3 = Window.Color
+                TitleLbl.TextSize = 13
+                TitleLbl.Font = Enum.Font.GothamBold
+                TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+                TitleLbl.Parent = ParaFrame
+
+                local ContentLbl = Instance.new("TextLabel")
+                ContentLbl.Size = UDim2.new(1, -20, 1, -30)
+                ContentLbl.Position = UDim2.new(0, 10, 0, 25)
+                ContentLbl.BackgroundTransparency = 1
+                ContentLbl.Text = Content
+                ContentLbl.TextColor3 = Color3.fromRGB(180, 180, 180)
+                ContentLbl.TextSize = 12
+                ContentLbl.Font = Enum.Font.Gotham
+                ContentLbl.TextWrapped = true
+                ContentLbl.TextXAlignment = Enum.TextXAlignment.Left
+                ContentLbl.TextYAlignment = Enum.TextYAlignment.Top
+                ContentLbl.Parent = ParaFrame
+                
+                -- Auto adjust height
+                local reqHeight = 35 + (string.len(Content) / 45) * 15
+                ParaFrame.Size = UDim2.new(1, 0, 0, math.max(60, reqHeight))
+                
+                return {
+                    Set = function(newOpts)
+                        if newOpts.Title then TitleLbl.Text = newOpts.Title end
+                        if newOpts.Content then 
+                            ContentLbl.Text = newOpts.Content
+                            local nH = 35 + (string.len(newOpts.Content) / 45) * 15
+                            Tween(ParaFrame, {Size = UDim2.new(1, 0, 0, math.max(60, nH))}, 0.2)
+                        end
+                    end
+                }
+            end
+
+            -- BUTTON
             function Section:CreateButton(opts)
                 local btnName = opts.Name or "Button"
                 local callback = opts.Callback or function() end
@@ -308,6 +482,244 @@ function Alchemy:CreateWindow(options)
                 end))
             end
 
+            -- KEYBIND
+            function Section:CreateKeybind(opts)
+                local kName = opts.Name or "Keybind"
+                local currentKey = opts.CurrentKey or Enum.KeyCode.E
+                local callback = opts.Callback or function() end
+
+                local KeyHolder = Instance.new("Frame")
+                KeyHolder.Size = UDim2.new(1, 0, 0, 36)
+                KeyHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+                KeyHolder.BackgroundTransparency = 0.4
+                KeyHolder.Parent = TabPage
+                Round(KeyHolder, 6)
+
+                local Label = Instance.new("TextLabel")
+                Label.Size = UDim2.new(1, -100, 1, 0)
+                Label.Position = UDim2.new(0, 10, 0, 0)
+                Label.BackgroundTransparency = 1
+                Label.Text = kName
+                Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+                Label.TextSize = 13
+                Label.Font = Enum.Font.Gotham
+                Label.TextXAlignment = Enum.TextXAlignment.Left
+                Label.Parent = KeyHolder
+
+                local BindBtn = Instance.new("TextButton")
+                BindBtn.Size = UDim2.new(0, 80, 0, 24)
+                BindBtn.Position = UDim2.new(1, -90, 0.5, -12)
+                BindBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+                BindBtn.Text = currentKey.Name
+                BindBtn.TextColor3 = Window.Color
+                BindBtn.TextSize = 12
+                BindBtn.Font = Enum.Font.GothamBold
+                BindBtn.Parent = KeyHolder
+                Round(BindBtn, 4)
+
+                local IsBinding = false
+
+                AddConnection(BindBtn.MouseButton1Click:Connect(function()
+                    IsBinding = true
+                    BindBtn.Text = "..."
+                    Tween(BindBtn, {BackgroundColor3 = Color3.fromRGB(60, 60, 70)}, 0.2)
+                end))
+
+                AddConnection(UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                    if not gameProcessed then
+                        if IsBinding and input.UserInputType == Enum.UserInputType.Keyboard then
+                            currentKey = input.KeyCode
+                            BindBtn.Text = currentKey.Name
+                            Tween(BindBtn, {BackgroundColor3 = Color3.fromRGB(40, 40, 50)}, 0.2)
+                            IsBinding = false
+                        elseif not IsBinding and input.KeyCode == currentKey then
+                            callback(currentKey.Name)
+                        end
+                    end
+                end))
+                
+                return {
+                    Set = function(key)
+                        currentKey = typeof(key) == "EnumItem" and key or Enum.KeyCode[key]
+                        BindBtn.Text = currentKey.Name
+                    end
+                }
+            end
+
+            -- INPUT (TextBox)
+            function Section:CreateInput(opts)
+                local iName = opts.Name or "Input"
+                local placeHolder = opts.PlaceholderText or "Type here..."
+                local callback = opts.Callback or function() end
+
+                local InpHolder = Instance.new("Frame")
+                InpHolder.Size = UDim2.new(1, 0, 0, 46)
+                InpHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+                InpHolder.BackgroundTransparency = 0.4
+                InpHolder.Parent = TabPage
+                Round(InpHolder, 6)
+
+                local Label = Instance.new("TextLabel")
+                Label.Size = UDim2.new(1, -10, 0, 20)
+                Label.Position = UDim2.new(0, 10, 0, 2)
+                Label.BackgroundTransparency = 1
+                Label.Text = iName
+                Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+                Label.TextSize = 12
+                Label.Font = Enum.Font.Gotham
+                Label.TextXAlignment = Enum.TextXAlignment.Left
+                Label.Parent = InpHolder
+
+                local BoxBG = Instance.new("Frame")
+                BoxBG.Size = UDim2.new(1, -20, 0, 20)
+                BoxBG.Position = UDim2.new(0, 10, 0, 22)
+                BoxBG.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+                BoxBG.Parent = InpHolder
+                Round(BoxBG, 4)
+                local stroke = Instance.new("UIStroke", BoxBG)
+                stroke.Color = Color3.fromRGB(50, 50, 60)
+
+                local TextBox = Instance.new("TextBox")
+                TextBox.Size = UDim2.new(1, -10, 1, 0)
+                TextBox.Position = UDim2.new(0, 5, 0, 0)
+                TextBox.BackgroundTransparency = 1
+                TextBox.Text = ""
+                TextBox.PlaceholderText = placeHolder
+                TextBox.TextColor3 = Window.Color
+                TextBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+                TextBox.TextSize = 12
+                TextBox.Font = Enum.Font.Gotham
+                TextBox.TextXAlignment = Enum.TextXAlignment.Left
+                TextBox.ClearTextOnFocus = false
+                TextBox.Parent = BoxBG
+
+                AddConnection(TextBox.FocusLost:Connect(function(enterPressed)
+                    if enterPressed then
+                        callback(TextBox.Text)
+                        Tween(stroke, {Color = Window.Color}, 0.1)
+                        task.wait(0.2)
+                        Tween(stroke, {Color = Color3.fromRGB(50, 50, 60)}, 0.3)
+                    end
+                end))
+            end
+
+            -- DROPDOWN
+            function Section:CreateDropdown(opts)
+                local dName = opts.Name or "Dropdown"
+                local options = opts.Options or {"Option 1", "Option 2"}
+                local current = opts.CurrentOption or options[1]
+                local callback = opts.Callback or function() end
+
+                local DropHolder = Instance.new("Frame")
+                DropHolder.Size = UDim2.new(1, 0, 0, 36)
+                DropHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+                DropHolder.BackgroundTransparency = 0.4
+                DropHolder.ClipsDescendants = true
+                DropHolder.Parent = TabPage
+                Round(DropHolder, 6)
+
+                local MainBtn = Instance.new("TextButton")
+                MainBtn.Size = UDim2.new(1, 0, 0, 36)
+                MainBtn.BackgroundTransparency = 1
+                MainBtn.Text = ""
+                MainBtn.Parent = DropHolder
+
+                local Label = Instance.new("TextLabel")
+                Label.Size = UDim2.new(1, -150, 1, 0)
+                Label.Position = UDim2.new(0, 10, 0, 0)
+                Label.BackgroundTransparency = 1
+                Label.Text = dName
+                Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+                Label.TextSize = 13
+                Label.Font = Enum.Font.Gotham
+                Label.TextXAlignment = Enum.TextXAlignment.Left
+                Label.Parent = MainBtn
+
+                local SelectBox = Instance.new("Frame")
+                SelectBox.Size = UDim2.new(0, 120, 0, 24)
+                SelectBox.Position = UDim2.new(1, -130, 0.5, -12)
+                SelectBox.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+                SelectBox.Parent = MainBtn
+                Round(SelectBox, 4)
+
+                local SelectLabel = Instance.new("TextLabel")
+                SelectLabel.Size = UDim2.new(1, -5, 1, 0)
+                SelectLabel.BackgroundTransparency = 1
+                SelectLabel.Text = tostring(current)
+                SelectLabel.TextColor3 = Window.Color
+                SelectLabel.TextSize = 12
+                SelectLabel.Font = Enum.Font.GothamBold
+                SelectLabel.Parent = SelectBox
+
+                local ItemsContainer = Instance.new("Frame")
+                ItemsContainer.Size = UDim2.new(1, -20, 0, 0) -- Grows dynamically
+                ItemsContainer.Position = UDim2.new(0, 10, 0, 36)
+                ItemsContainer.BackgroundTransparency = 1
+                ItemsContainer.Parent = DropHolder
+
+                local ItemList = Instance.new("UIListLayout")
+                ItemList.SortOrder = Enum.SortOrder.LayoutOrder
+                ItemList.Padding = UDim.new(0, 4)
+                ItemList.Parent = ItemsContainer
+
+                local IsOpen = false
+                local OptionBtns = {}
+
+                local function PopulateOptions(optsList)
+                    for _, old in ipairs(OptionBtns) do old:Destroy() end
+                    OptionBtns = {}
+                    
+                    for i, opt in ipairs(optsList) do
+                        local optBtn = Instance.new("TextButton")
+                        optBtn.Size = UDim2.new(1, 0, 0, 26)
+                        optBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+                        optBtn.Text = tostring(opt)
+                        optBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+                        optBtn.TextSize = 12
+                        optBtn.Font = Enum.Font.Gotham
+                        optBtn.Parent = ItemsContainer
+                        Round(optBtn, 4)
+                        table.insert(OptionBtns, optBtn)
+
+                        AddConnection(optBtn.MouseButton1Click:Connect(function()
+                            current = opt
+                            SelectLabel.Text = tostring(opt)
+                            callback(opt)
+                            IsOpen = false
+                            Tween(DropHolder, {Size = UDim2.new(1, 0, 0, 36)}, 0.3, Enum.EasingStyle.Exponential)
+                        end))
+                    end
+                end
+
+                PopulateOptions(options)
+
+                AddConnection(MainBtn.MouseButton1Click:Connect(function()
+                    IsOpen = not IsOpen
+                    if IsOpen then
+                        local requiredSize = 36 + (26 * #options) + (4 * #options) + 10
+                        Tween(DropHolder, {Size = UDim2.new(1, 0, 0, requiredSize)}, 0.3, Enum.EasingStyle.Exponential)
+                    else
+                        Tween(DropHolder, {Size = UDim2.new(1, 0, 0, 36)}, 0.3, Enum.EasingStyle.Exponential)
+                    end
+                end))
+
+                return {
+                    Set = function(val)
+                        current = val
+                        SelectLabel.Text = tostring(val)
+                        callback(val)
+                    end,
+                    Refresh = function(newOptions)
+                        PopulateOptions(newOptions)
+                        if IsOpen then
+                            local reqSize = 36 + (26 * #newOptions) + (4 * #newOptions) + 10
+                            Tween(DropHolder, {Size = UDim2.new(1, 0, 0, reqSize)}, 0.3)
+                        end
+                    end
+                }
+            end
+
+            -- TOGGLE
             function Section:CreateToggle(opts)
                 local tName = opts.Name or "Toggle"
                 local state = opts.Default or false
@@ -369,6 +781,7 @@ function Alchemy:CreateWindow(options)
                 }
             end
 
+            -- SLIDER
             function Section:CreateSlider(opts)
                 local sName = opts.Name or "Slider"
                 local sMin = opts.Min or 0
@@ -452,6 +865,15 @@ function Alchemy:CreateWindow(options)
                         updateSlider(input)
                     end
                 end))
+                
+                return {
+                    Set = function(val)
+                        local pos = math.clamp((val - sMin) / (sMax - sMin), 0, 1)
+                        Tween(Fill, {Size = UDim2.new(pos, 0, 1, 0)}, 0.1)
+                        ValueLabel.Text = tostring(val)
+                        callback(val)
+                    end
+                }
             end
             
             function Section:CreateLabel(txt)
@@ -464,6 +886,8 @@ function Alchemy:CreateWindow(options)
                 lbl.Font = Enum.Font.Gotham
                 lbl.TextXAlignment = Enum.TextXAlignment.Left
                 lbl.Parent = TabPage
+                
+                return { Set = function(newTxt) lbl.Text = newTxt end }
             end
 
             return Section
