@@ -1150,7 +1150,7 @@ function AlchemyLib.CreateDropdown(parent, label, options, default, callback)
     header.Parent = holder
 
     local headerLabel = Instance.new("TextLabel")
-    headerLabel.Size = UDim2.new(1, -50, 1, 0)
+    headerLabel.Size = UDim2.new(0, 0, 1, 0)
     headerLabel.Position = UDim2.new(0, 12, 0, 0)
     headerLabel.BackgroundTransparency = 1
     headerLabel.Text = label
@@ -1158,11 +1158,12 @@ function AlchemyLib.CreateDropdown(parent, label, options, default, callback)
     headerLabel.Font = Theme.FontLight
     headerLabel.TextColor3 = Theme.TextDim
     headerLabel.TextXAlignment = Enum.TextXAlignment.Left
+    headerLabel.AutomaticSize = Enum.AutomaticSize.X -- Dynamic width
     headerLabel.Parent = header
 
     local selectedLabel = Instance.new("TextLabel")
-    selectedLabel.Size = UDim2.new(1, -100, 1, 0)
-    selectedLabel.Position = UDim2.new(0, 85, 0, 0)
+    selectedLabel.Size = UDim2.new(1, -140, 1, 0) -- Allow more space
+    selectedLabel.Position = UDim2.new(0, 0, 0, 0) -- Will be handled by layout or padding
     selectedLabel.BackgroundTransparency = 1
     selectedLabel.Text = selected
     selectedLabel.TextSize = 13
@@ -1171,13 +1172,24 @@ function AlchemyLib.CreateDropdown(parent, label, options, default, callback)
     selectedLabel.TextXAlignment = Enum.TextXAlignment.Left
     selectedLabel.Parent = header
 
-    -- Flecha indicadora
+    -- Layout to prevent overlap
+    local headLayout = Instance.new("UIListLayout")
+    headLayout.FillDirection = Enum.FillDirection.Horizontal
+    headLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    headLayout.Padding = UDim.new(0, 10)
+    headLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    headLayout.Parent = header
+
+    local headPad = Instance.new("UIPadding")
+    headPad.PaddingLeft = UDim.new(0, 12)
+    headPad.Parent = header
+
     local arrow = Instance.new("TextLabel")
     arrow.Size = UDim2.new(0, 30, 1, 0)
-    arrow.Position = UDim2.new(1, -36, 0, 0)
+    arrow.Position = UDim2.new(1, -30, 0, 0)
     arrow.BackgroundTransparency = 1
-    arrow.Text = "▾"
-    arrow.TextSize = 16
+    arrow.Text = "V" -- Use a safe, compatible character
+    arrow.TextSize = 12
     arrow.Font = Theme.Font
     arrow.TextColor3 = Theme.AccentLight
     arrow.Parent = header
@@ -1436,46 +1448,65 @@ function AlchemyLib:CreateHub(config)
     TitleBar.ZIndex = 2
     TitleBar.Parent = MainFrame
 
+    -- Layout for TitleBar items
+    local titleLayout = Instance.new("UIListLayout")
+    titleLayout.FillDirection = Enum.FillDirection.Horizontal
+    titleLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    titleLayout.Padding = UDim.new(0, 10)
+    titleLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    titleLayout.Parent = TitleBar
+
+    local titlePad = Instance.new("UIPadding")
+    titlePad.PaddingLeft = UDim.new(0, 15)
+    titlePad.Parent = TitleBar
+
     pcall(function()
         local TitleIcon = Instance.new("ImageLabel")
-        TitleIcon.Size = UDim2.new(0, 32, 0, 32)
-        TitleIcon.Position = UDim2.new(0, 15, 0.5, -16)
+        TitleIcon.Name = "Icon"
+        TitleIcon.Size = UDim2.new(0, 24, 0, 24)
         TitleIcon.BackgroundTransparency = 1
         TitleIcon.Image = hubIcon
+        TitleIcon.LayoutOrder = 1
         TitleIcon.Parent = TitleBar
     end)
 
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(0, 200, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 55, 0, 0)
+    TitleLabel.Name = "Title"
+    TitleLabel.Size = UDim2.new(0, 0, 1, 0)
+    TitleLabel.AutomaticSize = Enum.AutomaticSize.X
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = hubTitle
     TitleLabel.TextSize = 17
     TitleLabel.Font = Theme.Font
     TitleLabel.TextColor3 = Theme.Text
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.LayoutOrder = 2
     TitleLabel.Parent = TitleBar
 
     local VersionLabel = Instance.new("TextLabel")
-    VersionLabel.Size = UDim2.new(0, 50, 1, 0)
-    VersionLabel.Position = UDim2.new(0, 210, 0, 0)
+    VersionLabel.Name = "Version"
+    VersionLabel.Size = UDim2.new(0, 0, 1, 0)
+    VersionLabel.AutomaticSize = Enum.AutomaticSize.X
     VersionLabel.BackgroundTransparency = 1
     VersionLabel.Text = hubVersion
     VersionLabel.TextSize = 12
     VersionLabel.Font = Theme.FontLight
     VersionLabel.TextColor3 = Theme.AccentLight
     VersionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    VersionLabel.LayoutOrder = 3
     VersionLabel.Parent = TitleBar
 
     local AuthorLabel = Instance.new("TextLabel")
-    AuthorLabel.Size = UDim2.new(0, 150, 1, 0)
-    AuthorLabel.Position = UDim2.new(0, 250, 0, 0)
+    AuthorLabel.Name = "Author"
+    AuthorLabel.Size = UDim2.new(0, 0, 1, 0)
+    AuthorLabel.AutomaticSize = Enum.AutomaticSize.X
     AuthorLabel.BackgroundTransparency = 1
     AuthorLabel.Text = hubAuthor
     AuthorLabel.TextSize = 11
     AuthorLabel.Font = Theme.FontLight
     AuthorLabel.TextColor3 = Theme.TextDim
     AuthorLabel.TextXAlignment = Enum.TextXAlignment.Left
+    AuthorLabel.LayoutOrder = 4
     AuthorLabel.Parent = TitleBar
 
     -- ══ BOTONES VENTANA ══
