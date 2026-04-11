@@ -1369,9 +1369,15 @@ function AlchemyLib:CreateHub(config)
     Hub.TabPages = {}
     Hub.ActiveTab = config.DefaultTab or nil
 
-    -- Destruir GUI anterior
+    -- Destruir GUI anterior (Búsqueda exhaustiva para evitar duplicados)
     local guiParent = GetGuiParent()
-    pcall(function() if guiParent:FindFirstChild(hubName) then guiParent:FindFirstChild(hubName):Destroy() end end)
+    local oldNames = {hubName, "AlchemyHub", "AlchemyUniversal", "AlchemyHubv5"}
+    for _, name in pairs(oldNames) do
+        local old = guiParent:FindFirstChild(name)
+        if old then 
+            pcall(function() old:Destroy() end)
+        end
+    end
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = hubName
