@@ -274,10 +274,87 @@ function Alchemy:CreateWindow(options)
         return btn
     end
 
-    local BtnSettings = CreateTopBtn("⚙", Color3.fromRGB(60, 40, 90), 14)
-    local BtnSearch   = CreateTopBtn("🔍", Color3.fromRGB(60, 40, 90), 12)
-    local BtnMinimize = CreateTopBtn("-", Color3.fromRGB(90, 70, 50), 16)
+    local BtnSettings = CreateTopBtn("⚙", Color3.fromRGB(40, 40, 50), 14)
+    local BtnSearch   = CreateTopBtn("🔍", Color3.fromRGB(40, 40, 50), 12)
+    local BtnMinimize = CreateTopBtn("-", Color3.fromRGB(40, 40, 50), 16)
     local BtnClose    = CreateTopBtn("X", Color3.fromRGB(120, 40, 50), 14)
+
+    -- Search UI Implementation
+    local SearchFrame = Instance.new("Frame")
+    SearchFrame.Name = "SearchFrame"
+    SearchFrame.Size = UDim2.new(1, -200, 0, 30)
+    SearchFrame.Position = UDim2.new(0, 15, 0, 5)
+    SearchFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+    SearchFrame.BackgroundTransparency = 1
+    SearchFrame.Visible = false
+    SearchFrame.ClipsDescendants = true
+    SearchFrame.Parent = TitleBar
+    Round(SearchFrame, 6)
+
+    local SearchBox = Instance.new("TextBox")
+    SearchBox.Size = UDim2.new(1, -10, 1, 0)
+    SearchBox.Position = UDim2.new(0, 5, 0, 0)
+    SearchBox.BackgroundTransparency = 1
+    SearchBox.PlaceholderText = "Search elements..."
+    SearchBox.Text = ""
+    SearchBox.TextColor3 = Window.Color
+    SearchBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+    SearchBox.TextSize = 13
+    SearchBox.Font = Enum.Font.Gotham
+    SearchBox.TextXAlignment = Enum.TextXAlignment.Left
+    SearchBox.Parent = SearchFrame
+
+    local SearchUnderline = Instance.new("Frame")
+    SearchUnderline.Size = UDim2.new(1, 0, 0, 2)
+    SearchUnderline.Position = UDim2.new(0, 0, 1, -2)
+    SearchUnderline.BackgroundColor3 = Window.Color
+    SearchUnderline.BorderSizePixel = 0
+    SearchUnderline.Parent = SearchFrame
+
+    -- Search Logic
+    local searchActive = false
+    AddConnection(BtnSearch.MouseButton1Click:Connect(function()
+        searchActive = not searchActive
+        if searchActive then
+            SearchFrame.Visible = true
+            TitleLabel.Visible = false
+            Tween(SearchFrame, {BackgroundTransparency = 0}, 0.2)
+            SearchBox:CaptureFocus()
+        else
+            Tween(SearchFrame, {BackgroundTransparency = 1}, 0.2)
+            task.wait(0.2)
+            SearchFrame.Visible = false
+            TitleLabel.Visible = true
+            SearchBox.Text = ""
+        end
+    end))
+
+    AddConnection(SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        local query = SearchBox.Text:lower()
+        local currentPage = nil
+        
+        -- Find current page
+        for _, tab in pairs(Window.Tabs) do
+            if tab.Page.Visible then
+                currentPage = tab.Page
+                break
+            end
+        end
+
+        if currentPage then
+            for _, child in ipairs(currentPage:GetChildren()) do
+                if child:IsA("Frame") or child:IsA("TextButton") then
+                    if child.Name == "UIListLayout" or child.Name == "UIPadding" then
+                        -- Keep layout instances visible
+                    elseif string.find(child.Name:lower(), query) then
+                        child.Visible = true
+                    else
+                        child.Visible = false
+                    end
+                end
+            end
+        end
+    end))
 
     AddConnection(BtnClose.MouseButton1Click:Connect(function()
         Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 0), BackgroundTransparency = 1}, 0.3)
@@ -294,6 +371,31 @@ function Alchemy:CreateWindow(options)
 
     Window.SettingsButton = BtnSettings
     Window.SearchButton = BtnSearch
+    
+    -- Auto-Settings Tab Creation
+    local SettingsTab = Window:CreateTab({Name = "Settings"})
+    local SettingsSection = SettingsTab:CreateSection("Library Settings")
+    SettingsSection:CreateButton({
+        Name = "Destroy UI",
+        Callback = function() self:Destroy() end
+    })
+
+    AddConnection(BtnSettings.MouseButton1Click:Connect(function()
+        -- Trigger tab selection for settings
+        for _, tab in pairs(Window.Tabs) do
+            if tab.Button.Text == "  Settings" then
+                -- Manually trigger the click connection logic
+                for _, t in pairs(Window.Tabs) do
+                    t.Page.Visible = false
+                    Tween(t.Button, {BackgroundTransparency = 0.95, TextColor3 = Color3.fromRGB(180, 180, 180)}, 0.2)
+                end
+                tab.Page.Visible = true
+                Tween(tab.Button, {BackgroundTransparency = 0.8, TextColor3 = Window.Color}, 0.2)
+                Window.CurrentTab = "Settings"
+                break
+            end
+        end
+    end))
 
     local Sidebar = Instance.new("Frame")
     Sidebar.Size = UDim2.new(0, 150, 1, -40)
@@ -399,6 +501,7 @@ function Alchemy:CreateWindow(options)
                 local Content = opts.Content or "Content here."
 
                 local ParaFrame = Instance.new("Frame")
+                ParaFrame.Name = Title
                 ParaFrame.Size = UDim2.new(1, 0, 0, 60)
                 ParaFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
                 ParaFrame.BackgroundTransparency = 0.4
@@ -451,6 +554,7 @@ function Alchemy:CreateWindow(options)
                 local callback = opts.Callback or function() end
 
                 local BtnFrame = Instance.new("TextButton")
+                BtnFrame.Name = btnName
                 BtnFrame.Size = UDim2.new(1, 0, 0, 36)
                 BtnFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
                 BtnFrame.BackgroundTransparency = 0.4
@@ -489,6 +593,7 @@ function Alchemy:CreateWindow(options)
                 local callback = opts.Callback or function() end
 
                 local KeyHolder = Instance.new("Frame")
+                KeyHolder.Name = kName
                 KeyHolder.Size = UDim2.new(1, 0, 0, 36)
                 KeyHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
                 KeyHolder.BackgroundTransparency = 0.4
@@ -553,6 +658,7 @@ function Alchemy:CreateWindow(options)
                 local callback = opts.Callback or function() end
 
                 local InpHolder = Instance.new("Frame")
+                InpHolder.Name = iName
                 InpHolder.Size = UDim2.new(1, 0, 0, 46)
                 InpHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
                 InpHolder.BackgroundTransparency = 0.4
@@ -611,6 +717,7 @@ function Alchemy:CreateWindow(options)
                 local callback = opts.Callback or function() end
 
                 local DropHolder = Instance.new("Frame")
+                DropHolder.Name = dName
                 DropHolder.Size = UDim2.new(1, 0, 0, 36)
                 DropHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
                 DropHolder.BackgroundTransparency = 0.4
@@ -726,6 +833,7 @@ function Alchemy:CreateWindow(options)
                 local callback = opts.Callback or function() end
 
                 local TglHolder = Instance.new("Frame")
+                TglHolder.Name = tName
                 TglHolder.Size = UDim2.new(1, 0, 0, 36)
                 TglHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
                 TglHolder.BackgroundTransparency = 0.4
@@ -790,6 +898,7 @@ function Alchemy:CreateWindow(options)
                 local callback = opts.Callback or function() end
 
                 local SldrHolder = Instance.new("Frame")
+                SldrHolder.Name = sName
                 SldrHolder.Size = UDim2.new(1, 0, 0, 50)
                 SldrHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
                 SldrHolder.BackgroundTransparency = 0.4
@@ -878,6 +987,7 @@ function Alchemy:CreateWindow(options)
             
             function Section:CreateLabel(txt)
                 local lbl = Instance.new("TextLabel")
+                lbl.Name = "Label_" .. txt
                 lbl.Size = UDim2.new(1, 0, 0, 20)
                 lbl.BackgroundTransparency = 1
                 lbl.Text = txt
