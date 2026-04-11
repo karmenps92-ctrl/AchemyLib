@@ -1448,17 +1448,24 @@ function AlchemyLib:CreateHub(config)
     TitleBar.ZIndex = 2
     TitleBar.Parent = MainFrame
 
-    -- Layout for TitleBar items
+    -- Container for left-aligned items (Title, Version, Author)
+    local TitleLeftFrame = Instance.new("Frame")
+    TitleLeftFrame.Name = "LeftFrame"
+    TitleLeftFrame.Size = UDim2.new(1, -180, 1, 0) -- Leave space for right buttons
+    TitleLeftFrame.BackgroundTransparency = 1
+    TitleLeftFrame.Parent = TitleBar
+
+    -- Layout only for TitleBar labels
     local titleLayout = Instance.new("UIListLayout")
     titleLayout.FillDirection = Enum.FillDirection.Horizontal
     titleLayout.VerticalAlignment = Enum.VerticalAlignment.Center
     titleLayout.Padding = UDim.new(0, 10)
     titleLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    titleLayout.Parent = TitleBar
+    titleLayout.Parent = TitleLeftFrame
 
     local titlePad = Instance.new("UIPadding")
     titlePad.PaddingLeft = UDim.new(0, 15)
-    titlePad.Parent = TitleBar
+    titlePad.Parent = TitleLeftFrame
 
     pcall(function()
         local TitleIcon = Instance.new("ImageLabel")
@@ -1467,7 +1474,7 @@ function AlchemyLib:CreateHub(config)
         TitleIcon.BackgroundTransparency = 1
         TitleIcon.Image = hubIcon
         TitleIcon.LayoutOrder = 1
-        TitleIcon.Parent = TitleBar
+        TitleIcon.Parent = TitleLeftFrame
     end)
 
     local TitleLabel = Instance.new("TextLabel")
@@ -1481,7 +1488,7 @@ function AlchemyLib:CreateHub(config)
     TitleLabel.TextColor3 = Theme.Text
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.LayoutOrder = 2
-    TitleLabel.Parent = TitleBar
+    TitleLabel.Parent = TitleLeftFrame
 
     local VersionLabel = Instance.new("TextLabel")
     VersionLabel.Name = "Version"
@@ -1494,7 +1501,7 @@ function AlchemyLib:CreateHub(config)
     VersionLabel.TextColor3 = Theme.AccentLight
     VersionLabel.TextXAlignment = Enum.TextXAlignment.Left
     VersionLabel.LayoutOrder = 3
-    VersionLabel.Parent = TitleBar
+    VersionLabel.Parent = TitleLeftFrame
 
     local AuthorLabel = Instance.new("TextLabel")
     AuthorLabel.Name = "Author"
@@ -1507,7 +1514,7 @@ function AlchemyLib:CreateHub(config)
     AuthorLabel.TextColor3 = Theme.TextDim
     AuthorLabel.TextXAlignment = Enum.TextXAlignment.Left
     AuthorLabel.LayoutOrder = 4
-    AuthorLabel.Parent = TitleBar
+    AuthorLabel.Parent = TitleLeftFrame
 
     -- ══ BOTONES VENTANA ══
     local CloseBtn = Instance.new("TextButton")
