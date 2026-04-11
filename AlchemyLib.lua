@@ -50,6 +50,271 @@ AlchemyLib.Theme = {
     FontLight = Enum.Font.GothamMedium,
 }
 
+-- Registry for Real-time Translation
+AlchemyLib.TextRegistry = {}
+AlchemyLib.CurrentLanguage = "Español"
+
+AlchemyLib.Languages = {
+    ["Español"] = {
+        ["Search"] = "Buscar...",
+        ["Settings"] = "CONFIGURACIÓN",
+        ["Home"] = "Inicio",
+        ["Close"] = "Cerrar",
+        ["Color Picker"] = "Selector de Color",
+        ["Theme"] = "Tema",
+        ["Language"] = "Idioma",
+        ["Save Config"] = "Guardar",
+        ["Load Config"] = "Cargar",
+        ["Unload"] = "Cerrar Hub",
+        -- Tabs
+        ["Combat"] = "Combate",
+        ["Visual"] = "Visual",
+        ["Movement"] = "Movimiento",
+        ["Player"] = "Jugador",
+        ["Utilities"] = "Utilidades",
+        ["World"] = "Mundo",
+        ["Server"] = "Servidor",
+        ["Shaders"] = "Shaders",
+        ["Animations"] = "Animaciones",
+        ["Misc"] = "Varios",
+        ["Scripts"] = "Scripts",
+        ["Configuration"] = "Configuración",
+        -- Sections
+        ["SPEED"] = "VELOCIDAD",
+        ["FLY"] = "VUELO",
+        ["JUMP"] = "SALTO",
+        ["MISC"] = "MISC",
+        ["PERSONAJE"] = "PERSONAJE",
+        ["VEHICULOS"] = "VEHÍCULOS",
+        -- Elements
+        ["Aimbot"] = "Aimbot",
+        ["Kill Aura"] = "Kill Aura",
+        ["Attack Range"] = "Rango de Ataque",
+        ["Aimbot Target Part"] = "Objetivo de Aimbot",
+        ["Show FOV Circle"] = "Mostrar FOV",
+        ["Speed Hack"] = "Speed Hack",
+        ["Fly"] = "Volar",
+        ["Noclip"] = "Noclip",
+        ["Infinite Jump"] = "Salto Infinito",
+        ["God Mode (Client)"] = "Modo Dios",
+        ["Anti-Fling"] = "Anti-Empujones",
+    },
+    ["English"] = {
+        ["Search"] = "Search...",
+        ["Settings"] = "SETTINGS",
+        ["Home"] = "Home",
+        ["Close"] = "Close",
+        ["Color Picker"] = "Color Picker",
+        ["Theme"] = "Theme",
+        ["Language"] = "Language",
+        ["Save Config"] = "Save",
+        ["Load Config"] = "Load",
+        ["Unload"] = "Unload Hub",
+        -- Tabs
+        ["Combat"] = "Combat",
+        ["Visual"] = "Visual",
+        ["Movement"] = "Movement",
+        ["Player"] = "Player",
+        ["Utilities"] = "Utilities",
+        ["World"] = "World",
+        ["Server"] = "Server",
+        ["Shaders"] = "Shaders",
+        ["Animations"] = "Animations",
+        ["Misc"] = "Misc",
+        ["Scripts"] = "Scripts",
+        ["Configuration"] = "Configuration",
+        -- Sections
+        ["SPEED"] = "SPEED",
+        ["FLY"] = "FLY",
+        ["JUMP"] = "JUMP",
+        ["MISC"] = "MISC",
+        ["PERSONAJE"] = "CHARACTER",
+        ["VEHICULOS"] = "VEHICLES",
+        -- Elements
+        ["Aimbot"] = "Aimbot",
+        ["Kill Aura"] = "Kill Aura",
+        ["Attack Range"] = "Attack Range",
+        ["Aimbot Target Part"] = "Aimbot Target Part",
+        ["Show FOV Circle"] = "Show FOV",
+        ["Speed Hack"] = "Speed Hack",
+        ["Fly"] = "Fly",
+        ["Noclip"] = "Noclip",
+        ["Infinite Jump"] = "Infinite Jump",
+        ["God Mode (Client)"] = "God Mode",
+        ["Anti-Fling"] = "Anti-Fling",
+    },
+    ["Português"] = {
+        ["Search"] = "Procurar...",
+        ["Settings"] = "CONFIGURAÇÕES",
+        ["Home"] = "Início",
+        ["Close"] = "Fechar",
+        ["Color Picker"] = "Seletor de Cores",
+        ["Theme"] = "Tema",
+        ["Language"] = "Idioma",
+        ["Save Config"] = "Salvar",
+        ["Load Config"] = "Carregar",
+        ["Unload"] = "Fechar Hub",
+        -- Tabs
+        ["Combat"] = "Combate",
+        ["Visual"] = "Visual",
+        ["Movement"] = "Movimento",
+        ["Player"] = "Jogador",
+        ["Utilities"] = "Utilidades",
+        ["World"] = "Mundo",
+        ["Server"] = "Servidor",
+        ["Shaders"] = "Shaders",
+        ["Animations"] = "Animações",
+        ["Misc"] = "Diversos",
+        ["Scripts"] = "Scripts",
+        ["Configuration"] = "Configuração",
+        -- Sections
+        ["SPEED"] = "VELOCIDAD",
+        ["FLY"] = "VOAR",
+        ["JUMP"] = "PULAR",
+        ["MISC"] = "MISC",
+        ["PERSONAJE"] = "PERSONAGGEM",
+        ["VEHICULOS"] = "VEÍCULOS",
+        -- Elements
+        ["Aimbot"] = "Aimbot",
+        ["Kill Aura"] = "Kill Aura",
+        ["Attack Range"] = "Alcance de Ataque",
+        ["Aimbot Target Part"] = "Parte Alvo",
+        ["Show FOV Circle"] = "Mostrar FOV",
+        ["Speed Hack"] = "Speed Hack",
+        ["Fly"] = "Voar",
+        ["Noclip"] = "Noclip",
+        ["Infinite Jump"] = "Pulo Infinito",
+        ["God Mode (Client)"] = "Modo Deus",
+        ["Anti-Fling"] = "Anti-Empurro",
+    },
+    ["中文"] = {
+        ["Search"] = "搜索...",
+        ["Settings"] = "设置",
+        ["Home"] = "主页",
+        ["Close"] = "关闭",
+        ["Color Picker"] = "颜色选择器",
+        ["Theme"] = "主题",
+        ["Language"] = "语言",
+        ["Save Config"] = "保存",
+        ["Load Config"] = "加载",
+        ["Unload"] = "卸载",
+        -- Tabs
+        ["Combat"] = "战斗",
+        ["Visual"] = "视觉",
+        ["Movement"] = "移动",
+        ["Player"] = "玩家",
+        ["Utilities"] = "实用工具",
+        ["World"] = "世界",
+        ["Server"] = "服务器",
+        ["Shaders"] = "着色器",
+        ["Animations"] = "动画",
+        ["Misc"] = "杂项",
+        ["Scripts"] = "脚本",
+        ["Configuration"] = "配置",
+        -- Sections
+        ["SPEED"] = "速度",
+        ["FLY"] = "飞行",
+        ["JUMP"] = "跳跃",
+        ["MISC"] = "杂项",
+        ["PERSONAJE"] = "角色",
+        ["VEHICULOS"] = "车辆",
+        -- Elements
+        ["Aimbot"] = "战斗",
+        ["Kill Aura"] = "杀戮光环",
+        ["Speed Hack"] = "速度修改",
+        ["Fly"] = "飞行",
+        ["Noclip"] = "穿墙",
+        ["Infinite Jump"] = "无限跳跃",
+        ["God Mode (Client)"] = "上帝模式",
+    },
+    ["日本語"] = {
+        ["Search"] = "検索...",
+        ["Settings"] = "設定",
+        ["Home"] = "主画面",
+        ["Close"] = "閉じる",
+        ["Color Picker"] = "カラーピッカー",
+        ["Theme"] = "テーマ",
+        ["Language"] = "言語",
+        ["Save Config"] = "保存",
+        ["Load Config"] = "読込",
+        ["Unload"] = "終了",
+        -- Tabs
+        ["Combat"] = "戦闘",
+        ["Visual"] = "ビジュアル",
+        ["Movement"] = "移動",
+        ["Player"] = "プレイヤー",
+        ["Utilities"] = "ユーティリティ",
+        ["World"] = "ワールド",
+        ["Server"] = "サーバー",
+        ["Shaders"] = "シェーダー",
+        ["Animations"] = "アニメーション",
+        ["Misc"] = "その他",
+        ["Scripts"] = "スクリプト",
+        ["Configuration"] = "設定",
+        -- Sections
+        ["SPEED"] = "スピード",
+        ["FLY"] = "飛行",
+        ["JUMP"] = "ジャンプ",
+        ["MISC"] = "その他",
+        ["PERSONAJE"] = "キャラクター",
+        ["VEHICULOS"] = "乗り物",
+        -- Elements
+        ["Speed Hack"] = "スピードハック",
+        ["Fly"] = "フライ",
+        ["Noclip"] = "ノークリップ",
+        ["Infinite Jump"] = "無限ジャンプ",
+        ["God Mode (Client)"] = "ゴッドモード",
+    },
+}
+
+-- Registry for Real-time Translation
+AlchemyLib.TextRegistry = {}
+AlchemyLib.CurrentLanguage = "Español"
+
+function AlchemyLib.Translate(key)
+    local dict = AlchemyLib.Languages[AlchemyLib.CurrentLanguage]
+    if dict and dict[key] then return dict[key] end
+    return key
+end
+
+-- Alias for shorter usage if needed
+function AlchemyLib.T(key)
+    return AlchemyLib.Translate(key)
+end
+
+function AlchemyLib.RegisterText(obj, key, prop)
+    table.insert(AlchemyLib.TextRegistry, {
+        Object = obj,
+        Key = key,
+        Property = prop or "Text"
+    })
+    -- Set initial text
+    pcall(function()
+        obj[prop or "Text"] = AlchemyLib.Translate(key)
+    end)
+end
+
+function AlchemyLib.SetLanguage(langName)
+    if not AlchemyLib.Languages[langName] then return end
+    AlchemyLib.CurrentLanguage = langName
+    print("[AlchemyLib] Idioma cambiado a: " .. langName)
+    
+    -- Update all registered components
+    for _, item in ipairs(AlchemyLib.TextRegistry) do
+        pcall(function()
+            if item.Object.Parent then -- Is still active in GUI
+                local translated = AlchemyLib.Translate(item.Key)
+                if item.Format then
+                    item.Object[item.Property] = item.Format(translated)
+                else
+                    item.Object[item.Property] = translated
+                end
+            end
+        end)
+    end
+end
+
+
 local Theme = AlchemyLib.Theme
 
 -- ══════════════════════════════════════
@@ -280,6 +545,7 @@ function AlchemyLib.CreateToggle(parent, name, default, callback)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Name = "SearchLabel" -- Tag para busqueda
     label.Parent = holder
+    AlchemyLib.RegisterText(label, name)
 
     local toggleBg = Instance.new("Frame")
     toggleBg.Size = UDim2.new(0, 46, 0, 24)
@@ -357,6 +623,7 @@ function AlchemyLib.CreateSlider(parent, name, min, max, default, callback)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Name = "SearchLabel" -- Tag para busqueda
     label.Parent = holder
+    AlchemyLib.RegisterText(label, name)
 
     local valueLabel = Instance.new("TextLabel")
     valueLabel.Size = UDim2.new(0.4, -12, 0, 20)
@@ -452,6 +719,7 @@ function AlchemyLib.CreateButton(parent, name, callback)
     btn.BorderSizePixel = 0
     btn.Name = "SearchLabel" -- Tag para busqueda (usa Text directamente)
     btn.Parent = btnFrame
+    AlchemyLib.RegisterText(btn, name)
     CreateCorner(btn, 8)
     CreateGradient(btn, Theme.AccentDark, Theme.AccentLight, -45)
 
@@ -496,6 +764,7 @@ function AlchemyLib.CreateSection(parent, title)
     sec.TextYAlignment = Enum.TextYAlignment.Bottom
     sec.Name = "SearchLabel" -- Tag para busqueda
     sec.Parent = parent
+    AlchemyLib.RegisterText(sec, title)
     return sec
 end
 
@@ -849,156 +1118,8 @@ end
 -- ══════════════════════════════════════
 --    SISTEMA DE IDIOMA / I18n (Fase 4)
 -- ══════════════════════════════════════
-AlchemyLib.Languages = {
-    ["Español"] = {
-        -- Tabs
-        ["Combat"]        = "Combate",
-        ["Visual"]        = "Visual",
-        ["Movement"]      = "Movimiento",
-        ["Player"]        = "Jugador",
-        ["Utilities"]     = "Utilidades",
-        ["World"]         = "Mundo",
-        ["Server"]        = "Servidor",
-        ["Shaders"]       = "Shaders",
-        ["Animations"]    = "Animaciones",
-        ["Misc"]          = "Varios",
-        ["Scripts"]       = "Scripts",
-        ["Configuration"] = "Configuración",
-        -- Secciones comunes
-        ["SPEED"]         = "VELOCIDAD",
-        ["FLY"]           = "VUELO",
-        ["JUMP"]          = "SALTO",
-        ["MISC"]          = "MISC",
-        ["PERSONAJE"]     = "PERSONAJE",
-        ["VEHICULOS"]     = "VEHÍCULOS",
-        -- Elementos
-        ["Speed Hack"]    = "Speed Hack",
-        ["Fly"]           = "Volar",
-        ["Noclip"]        = "Noclip",
-        ["Infinite Jump"] = "Salto Infinito",
-        ["God Mode (Client)"] = "Modo Dios",
-    },
-    ["English"] = {
-        ["Combat"]        = "Combat",
-        ["Visual"]        = "Visual",
-        ["Movement"]      = "Movement",
-        ["Player"]        = "Player",
-        ["Utilities"]     = "Utilities",
-        ["World"]         = "World",
-        ["Server"]        = "Server",
-        ["Shaders"]       = "Shaders",
-        ["Animations"]    = "Animations",
-        ["Misc"]          = "Misc",
-        ["Scripts"]       = "Scripts",
-        ["Configuration"] = "Configuration",
-        ["SPEED"]         = "SPEED",
-        ["FLY"]           = "FLY",
-        ["JUMP"]          = "JUMP",
-        ["MISC"]          = "MISC",
-        ["PERSONAJE"]     = "CHARACTER",
-        ["VEHICULOS"]     = "VEHICLES",
-        ["Speed Hack"]    = "Speed Hack",
-        ["Fly"]           = "Fly",
-        ["Noclip"]        = "Noclip",
-        ["Infinite Jump"] = "Infinite Jump",
-        ["God Mode (Client)"] = "God Mode",
-    },
-    ["Português"] = {
-        ["Combat"]        = "Combate",
-        ["Visual"]        = "Visual",
-        ["Movement"]      = "Movimento",
-        ["Player"]        = "Jogador",
-        ["Utilities"]     = "Utilidades",
-        ["World"]         = "Mundo",
-        ["Server"]        = "Servidor",
-        ["Shaders"]       = "Shaders",
-        ["Animations"]    = "Animações",
-        ["Misc"]          = "Diversos",
-        ["Scripts"]       = "Scripts",
-        ["Configuration"] = "Configuração",
-        ["SPEED"]         = "VELOCIDAD",
-        ["FLY"]           = "VOAR",
-        ["JUMP"]          = "PULAR",
-        ["MISC"]          = "MISC",
-        ["PERSONAJE"]     = "PERSONAGGEM",
-        ["VEHICULOS"]     = "VEÍCULOS",
-        ["Speed Hack"]    = "Speed Hack",
-        ["Fly"]           = "Voar",
-        ["Noclip"]        = "Noclip",
-        ["Infinite Jump"] = "Pulo Infinito",
-        ["God Mode (Client)"] = "Modo Deus",
-    },
-    ["中文"] = {
-        ["Combat"]        = "战斗",
-        ["Visual"]        = "视觉",
-        ["Movement"]      = "移动",
-        ["Player"]        = "玩家",
-        ["Utilities"]     = "实用工具",
-        ["World"]         = "世界",
-        ["Server"]        = "服务器",
-        ["Shaders"]       = "着色器",
-        ["Animations"]    = "动画",
-        ["Misc"]          = "杂项",
-        ["Scripts"]       = "脚本",
-        ["Configuration"] = "配置",
-        ["SPEED"]         = "速度",
-        ["FLY"]           = "飞行",
-        ["JUMP"]          = "跳跃",
-        ["MISC"]          = "杂项",
-        ["PERSONAJE"]     = "角色",
-        ["VEHICULOS"]     = "车辆",
-        ["Speed Hack"]    = "速度修改",
-        ["Fly"]           = "飞行",
-        ["Noclip"]        = "穿墙",
-        ["Infinite Jump"] = "无限跳跃",
-        ["God Mode (Client)"] = "上帝模式",
-    },
-    ["日本語"] = {
-        ["Combat"]        = "戦闘",
-        ["Visual"]        = "ビジュアル",
-        ["Movement"]      = "移動",
-        ["Player"]        = "プレイヤー",
-        ["Utilities"]     = "ユーティリティ",
-        ["World"]         = "ワールド",
-        ["Server"]        = "サーバー",
-        ["Shaders"]       = "シェーダー",
-        ["Animations"]    = "アニメーション",
-        ["Misc"]          = "その他",
-        ["Scripts"]       = "スクリプト",
-        ["Configuration"] = "設定",
-        ["SPEED"]         = "スピード",
-        ["FLY"]           = "飛行",
-        ["JUMP"]          = "ジャンプ",
-        ["MISC"]          = "その他",
-        ["PERSONAJE"]     = "キャラクター",
-        ["VEHICULOS"]     = "乗り物",
-        ["Speed Hack"]    = "スピードハック",
-        ["Fly"]           = "フライ",
-        ["Noclip"]        = "ノークリップ",
-        ["Infinite Jump"] = "無限ジャンプ",
-        ["God Mode (Client)"] = "ゴッドモード",
-    },
-}
+-- [REDUNDANT LANGUAGE SYSTEM REMOVED]
 
-AlchemyLib._currentLang = "Español"
-
--- Traduce un string; devuelve original si no hay traducción
-function AlchemyLib.T(key)
-    local dict = AlchemyLib.Languages[AlchemyLib._currentLang]
-    if dict and dict[key] then return dict[key] end
-    return key
-end
-
--- Aplica un idioma: modifica _currentLang
--- La traducción es on-demand via AlchemyLib.T()
-function AlchemyLib.SetLanguage(langName)
-    if AlchemyLib.Languages[langName] then
-        AlchemyLib._currentLang = langName
-        print("[AlchemyLib] Idioma cambiado a: " .. langName)
-    else
-        warn("[AlchemyLib] Idioma no encontrado: " .. langName)
-    end
-end
 
 -- ══════════════════════════════════════
 --    DROPDOWN (MENÚ DESPLEGABLE)
@@ -1459,10 +1580,9 @@ function AlchemyLib:CreateHub(config)
     SearchInput.TextSize = 13
     SearchInput.Font = Theme.FontLight
     SearchInput.TextColor3 = Theme.Text
-    SearchInput.PlaceholderColor3 = Theme.TextDim
-    SearchInput.ClearTextOnFocus = false
-    SearchInput.ZIndex = 111
+    SearchInput.TextXAlignment = Enum.TextXAlignment.Left
     SearchInput.Parent = SearchBar
+    AlchemyLib.RegisterText(SearchInput, "Search", "PlaceholderText")
 
     local searchOpen = false
     SearchBtn.MouseButton1Click:Connect(function()
@@ -1715,7 +1835,7 @@ function AlchemyLib:CreateHub(config)
     end
 
     -- Crear Tab
-    function Hub:CreateTab(tabName, tabIcon, order)
+    function Hub:CreateTab(tabName, tabIcon, order, hidden)
         local tabBtn = Instance.new("TextButton")
         tabBtn.Name = tabName
         tabBtn.Size = UDim2.new(1, 0, 0, 38)
@@ -1728,8 +1848,20 @@ function AlchemyLib:CreateHub(config)
         tabBtn.TextXAlignment = Enum.TextXAlignment.Left
         tabBtn.BorderSizePixel = 0
         tabBtn.LayoutOrder = order or (#Hub.TabButtons + 1)
+        tabBtn.Visible = not hidden -- Nueva funcionalidad: soporta pestañas ocultas
         tabBtn.Parent = SidebarScroll
         CreateCorner(tabBtn, 8)
+        
+        -- Registration for Translation (with Icon Support)
+        table.insert(AlchemyLib.TextRegistry, {
+            Object = tabBtn,
+            Key = tabName,
+            Property = "Text",
+            Format = function(translated)
+                return (tabIcon or "") .. "  " .. translated
+            end
+        })
+        tabBtn.Text = (tabIcon or "") .. "  " .. AlchemyLib.Translate(tabName)
 
         local tabPad = Instance.new("UIPadding")
         tabPad.PaddingLeft = UDim.new(0, 12)
