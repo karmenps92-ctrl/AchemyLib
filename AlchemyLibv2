@@ -105,16 +105,16 @@ function Alchemy:Notify(options)
 
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, 0, 0, 0) -- Starts collapsed
-    Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    Frame.BackgroundTransparency = 0.1
+    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    Frame.BackgroundTransparency = 0
     Frame.ClipsDescendants = true
     Frame.Parent = Container
-    Round(Frame, 8)
+    Round(Frame, 10)
 
     local Stroke = Instance.new("UIStroke")
     Stroke.Color = Color
-    Stroke.Thickness = 1.5
-    Stroke.Transparency = 0.5
+    Stroke.Thickness = 1
+    Stroke.Transparency = 0.8
     Stroke.Parent = Frame
 
     local TitleLbl = Instance.new("TextLabel")
@@ -180,20 +180,20 @@ function Alchemy:CreateWindow(options)
 
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "Main"
-    MainFrame.Size = UDim2.new(0, 600, 0, 420)
-    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -210)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-    MainFrame.BackgroundTransparency = 0.15
-    MainFrame.BorderSizePixel = 0
+    MainFrame.Size = UDim2.new(0, 650, 0, 450)
+    MainFrame.Position = UDim2.new(0.5, -325, 0.5, -225)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(8, 8, 10)
     MainFrame.ClipsDescendants = true
     MainFrame.Parent = ScreenGui
-    Round(MainFrame, 8)
+    Round(MainFrame, 12)
 
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(255, 255, 255)
-    Stroke.Transparency = 0.85
-    Stroke.Parent = MainFrame
+    local MainStroke = Instance.new("UIStroke")
+    MainStroke.Color = Color3.fromRGB(255, 255, 255)
+    MainStroke.Transparency = 0.9 -- Very subtle glass edge
+    MainStroke.Thickness = 1
+    MainStroke.Parent = MainFrame
 
+    -- Dragging Logic
     local dragging, dragInput, dragStart, startPos
     AddConnection(MainFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -217,139 +217,135 @@ function Alchemy:CreateWindow(options)
         end
     end))
 
-    local TitleBar = Instance.new("Frame")
-    TitleBar.Size = UDim2.new(1, 0, 0, 40)
-    TitleBar.BackgroundTransparency = 1
-    TitleBar.Parent = MainFrame
+    -- HEADER AREA
+    local Header = Instance.new("Frame")
+    Header.Size = UDim2.new(1, 0, 0, 60)
+    Header.BackgroundTransparency = 1
+    Header.Parent = MainFrame
+
+    local LogoBox = Instance.new("Frame")
+    LogoBox.Size = UDim2.new(0, 40, 0, 40)
+    LogoBox.Position = UDim2.new(0, 15, 0, 10)
+    LogoBox.BackgroundColor3 = WindowColor
+    LogoBox.Parent = Header
+    Round(LogoBox, 8)
+    
+    local LogoText = Instance.new("TextLabel")
+    LogoText.Size = UDim2.new(1, 0, 1, 0)
+    LogoText.BackgroundTransparency = 1
+    LogoText.Text = WindowName:sub(1,1):upper()
+    LogoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LogoText.TextSize = 20
+    LogoText.Font = Enum.Font.GothamBold
+    LogoText.Parent = LogoBox
 
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -20, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+    TitleLabel.Size = UDim2.new(0, 200, 0, 40)
+    TitleLabel.Position = UDim2.new(0, 65, 0, 10)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = WindowName
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextSize = 16
+    TitleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+    TitleLabel.TextSize = 18
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.Parent = TitleBar
+    TitleLabel.Parent = Header
 
-    local TitleGlow = Instance.new("UIGradient")
-    TitleGlow.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, WindowColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)) })
-    TitleGlow.Parent = TitleLabel
+    local SubTitle = Instance.new("TextLabel")
+    SubTitle.Size = UDim2.new(0, 200, 0, 20)
+    SubTitle.Position = UDim2.new(0, 65, 0, 32)
+    SubTitle.BackgroundTransparency = 1
+    SubTitle.Text = "Premium Edition"
+    SubTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+    SubTitle.TextSize = 11
+    SubTitle.Font = Enum.Font.GothamMedium
+    SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+    SubTitle.Parent = Header
+
+    -- Control Pillar (Top Right Group)
+    local ControlPillar = Instance.new("Frame")
+    ControlPillar.Size = UDim2.new(0, 160, 0, 32)
+    ControlPillar.Position = UDim2.new(1, -175, 0, 14)
+    ControlPillar.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    ControlPillar.Parent = Header
+    Round(ControlPillar, 8)
     
-    local ButtonContainer = Instance.new("Frame")
-    ButtonContainer.Size = UDim2.new(0, 140, 1, 0)
-    ButtonContainer.Position = UDim2.new(1, -140, 0, 0)
-    ButtonContainer.BackgroundTransparency = 1
-    ButtonContainer.Parent = TitleBar
+    local PillarStroke = Instance.new("UIStroke")
+    PillarStroke.Color = Color3.fromRGB(100, 100, 100)
+    PillarStroke.Transparency = 0.8
+    PillarStroke.Parent = ControlPillar
 
-    local BtnLayout = Instance.new("UIListLayout")
-    BtnLayout.FillDirection = Enum.FillDirection.Horizontal
-    BtnLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-    BtnLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-    BtnLayout.Padding = UDim.new(0, 6)
-    BtnLayout.Parent = ButtonContainer
+    local CtrlLayout = Instance.new("UIListLayout")
+    CtrlLayout.FillDirection = Enum.FillDirection.Horizontal
+    CtrlLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    CtrlLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    CtrlLayout.Padding = UDim.new(0, 10)
+    CtrlLayout.Parent = ControlPillar
 
-    local BtnPadding = Instance.new("UIPadding")
-    BtnPadding.PaddingRight = UDim.new(0, 10)
-    BtnPadding.Parent = ButtonContainer
-
-    local function CreateTopBtn(text, color, iconSize)
+    local function CreateIconBtn(text, color, iconSize)
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, 26, 0, 26)
-        btn.BackgroundColor3 = color
-        btn.BackgroundTransparency = 0.2
+        btn.Size = UDim2.new(0, 24, 0, 24)
+        btn.BackgroundTransparency = 1
         btn.Text = text
-        btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-        btn.TextSize = iconSize or 12
+        btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        btn.TextSize = iconSize or 14
         btn.Font = Enum.Font.GothamBold
-        btn.Parent = ButtonContainer
-        Round(btn, 6)
+        btn.Parent = ControlPillar
         
-        local h, s, v = color:ToHSV()
-        local hoverColor = Color3.fromHSV(h, s, math.clamp(v + 0.2, 0, 1))
-
-        AddConnection(btn.MouseEnter:Connect(function() Tween(btn, {BackgroundColor3 = hoverColor, TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.2) end))
-        AddConnection(btn.MouseLeave:Connect(function() Tween(btn, {BackgroundColor3 = color, TextColor3 = Color3.fromRGB(220, 220, 220)}, 0.2) end))
+        AddConnection(btn.MouseEnter:Connect(function() Tween(btn, {TextColor3 = WindowColor}, 0.2) end))
+        AddConnection(btn.MouseLeave:Connect(function() Tween(btn, {TextColor3 = Color3.fromRGB(200, 200, 200)}, 0.2) end))
         return btn
     end
 
-    local BtnSettings = CreateTopBtn("⚙", Color3.fromRGB(40, 40, 50), 14)
-    local BtnSearch   = CreateTopBtn("🔍", Color3.fromRGB(40, 40, 50), 12)
-    local BtnMinimize = CreateTopBtn("-", Color3.fromRGB(40, 40, 50), 16)
-    local BtnClose    = CreateTopBtn("X", Color3.fromRGB(120, 40, 50), 14)
+    local BtnSearch   = CreateIconBtn("🔍", nil, 14)
+    local BtnSettings = CreateIconBtn("⚙", nil, 16)
+    local BtnMinimize = CreateIconBtn("-", nil, 18)
+    local BtnClose    = CreateIconBtn("✕", nil, 14)
 
-    -- Search UI Implementation
-    local SearchFrame = Instance.new("Frame")
-    SearchFrame.Name = "SearchFrame"
-    SearchFrame.Size = UDim2.new(1, -200, 0, 30)
-    SearchFrame.Position = UDim2.new(0, 15, 0, 5)
-    SearchFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-    SearchFrame.BackgroundTransparency = 1
-    SearchFrame.Visible = false
-    SearchFrame.ClipsDescendants = true
-    SearchFrame.Parent = TitleBar
-    Round(SearchFrame, 6)
-
+    -- Integrated Search Bar (Hidden in Header)
     local SearchBox = Instance.new("TextBox")
-    SearchBox.Size = UDim2.new(1, -10, 1, 0)
-    SearchBox.Position = UDim2.new(0, 5, 0, 0)
+    SearchBox.Size = UDim2.new(0, 0, 0, 30)
+    SearchBox.Position = UDim2.new(1, -175, 0, 14) -- Overlaps pillar when active
+    SearchBox.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
     SearchBox.BackgroundTransparency = 1
-    SearchBox.PlaceholderText = "Search elements..."
+    SearchBox.BorderSizePixel = 0
+    SearchBox.PlaceholderText = "Search..."
     SearchBox.Text = ""
-    SearchBox.TextColor3 = Window.Color
+    SearchBox.TextColor3 = WindowColor
     SearchBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
     SearchBox.TextSize = 13
     SearchBox.Font = Enum.Font.Gotham
-    SearchBox.TextXAlignment = Enum.TextXAlignment.Left
-    SearchBox.Parent = SearchFrame
+    SearchBox.Visible = false
+    SearchBox.Parent = Header
+    Round(SearchBox, 8)
 
-    local SearchUnderline = Instance.new("Frame")
-    SearchUnderline.Size = UDim2.new(1, 0, 0, 2)
-    SearchUnderline.Position = UDim2.new(0, 0, 1, -2)
-    SearchUnderline.BackgroundColor3 = Window.Color
-    SearchUnderline.BorderSizePixel = 0
-    SearchUnderline.Parent = SearchFrame
-
-    -- Search Logic
     local searchActive = false
     AddConnection(BtnSearch.MouseButton1Click:Connect(function()
         searchActive = not searchActive
         if searchActive then
-            SearchFrame.Visible = true
-            TitleLabel.Visible = false
-            Tween(SearchFrame, {BackgroundTransparency = 0}, 0.2)
+            SearchBox.Visible = true
+            ControlPillar.Visible = false
+            Tween(SearchBox, {Size = UDim2.new(0, 250, 0, 32), Position = UDim2.new(1, -265, 0, 14), BackgroundTransparency = 0}, 0.3)
             SearchBox:CaptureFocus()
         else
-            Tween(SearchFrame, {BackgroundTransparency = 1}, 0.2)
-            task.wait(0.2)
-            SearchFrame.Visible = false
-            TitleLabel.Visible = true
+            Tween(SearchBox, {Size = UDim2.new(0, 0, 0, 30), Position = UDim2.new(1, -175, 0, 14), BackgroundTransparency = 1}, 0.3)
+            task.wait(0.3)
+            SearchBox.Visible = false
+            ControlPillar.Visible = true
             SearchBox.Text = ""
         end
     end))
 
     AddConnection(SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
         local query = SearchBox.Text:lower()
-        local currentPage = nil
-        
-        -- Find current page
-        for _, tab in pairs(Window.Tabs) do
-            if tab.Page.Visible then
-                currentPage = tab.Page
-                break
-            end
-        end
-
-        if currentPage then
-            for _, child in ipairs(currentPage:GetChildren()) do
-                if child:IsA("Frame") or child:IsA("TextButton") then
-                    if child.Name == "UIListLayout" or child.Name == "UIPadding" then
-                        -- Keep layout instances visible
-                    elseif string.find(child.Name:lower(), query) then
-                        child.Visible = true
-                    else
-                        child.Visible = false
+        for _, tData in pairs(Window.Tabs) do
+            if tData.Page.Visible then
+                for _, child in ipairs(tData.Page:GetChildren()) do
+                    if child:IsA("Frame") or child:IsA("TextButton") then
+                        if child.Name:lower():find(query) or child:FindFirstChild("UIListLayout") or child:FindFirstChild("UIPadding") then
+                            child.Visible = true
+                        else
+                            child.Visible = false
+                        end
                     end
                 end
             end
@@ -357,7 +353,7 @@ function Alchemy:CreateWindow(options)
     end))
 
     AddConnection(BtnClose.MouseButton1Click:Connect(function()
-        Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 0), BackgroundTransparency = 1}, 0.3)
+        Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 0), BackgroundTransparency = 1}, 0.3)
         task.wait(0.3)
         self:Destroy()
     end))
@@ -365,96 +361,76 @@ function Alchemy:CreateWindow(options)
     local minimized = false
     AddConnection(BtnMinimize.MouseButton1Click:Connect(function()
         minimized = not minimized
-        if minimized then Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 40)}, 0.3, Enum.EasingStyle.Exponential)
-        else Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 420)}, 0.3, Enum.EasingStyle.Exponential) end
+        if minimized then Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 60)}, 0.3, Enum.EasingStyle.Exponential)
+        else Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 450)}, 0.3, Enum.EasingStyle.Exponential) end
     end))
 
     Window.SettingsButton = BtnSettings
     Window.SearchButton = BtnSearch
-    
-    -- Auto-Settings Tab Creation
-    local SettingsTab = Window:CreateTab({Name = "Settings"})
-    local SettingsSection = SettingsTab:CreateSection("Library Settings")
-    SettingsSection:CreateButton({
-        Name = "Destroy UI",
-        Callback = function() self:Destroy() end
-    })
 
-    AddConnection(BtnSettings.MouseButton1Click:Connect(function()
-        -- Trigger tab selection for settings
-        for _, tab in pairs(Window.Tabs) do
-            if tab.Button.Text == "  Settings" then
-                -- Manually trigger the click connection logic
-                for _, t in pairs(Window.Tabs) do
-                    t.Page.Visible = false
-                    Tween(t.Button, {BackgroundTransparency = 0.95, TextColor3 = Color3.fromRGB(180, 180, 180)}, 0.2)
-                end
-                tab.Page.Visible = true
-                Tween(tab.Button, {BackgroundTransparency = 0.8, TextColor3 = Window.Color}, 0.2)
-                Window.CurrentTab = "Settings"
-                break
-            end
-        end
-    end))
-
+    -- SIDEBAR (Slim)
     local Sidebar = Instance.new("Frame")
-    Sidebar.Size = UDim2.new(0, 150, 1, -40)
-    Sidebar.Position = UDim2.new(0, 0, 0, 40)
-    Sidebar.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-    Sidebar.BackgroundTransparency = 0.5
+    Sidebar.Size = UDim2.new(0, 65, 1, -60)
+    Sidebar.Position = UDim2.new(0, 0, 0, 60)
+    Sidebar.BackgroundColor3 = Color3.fromRGB(6, 6, 8)
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = MainFrame
 
     local TabList = Instance.new("UIListLayout")
     TabList.SortOrder = Enum.SortOrder.LayoutOrder
-    TabList.Padding = UDim.new(0, 5)
+    TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    TabList.Padding = UDim.new(0, 12)
     TabList.Parent = Sidebar
 
     local SidebarPadding = Instance.new("UIPadding")
-    SidebarPadding.PaddingTop = UDim.new(0, 10)
-    SidebarPadding.PaddingLeft = UDim.new(0, 10)
-    SidebarPadding.PaddingRight = UDim.new(0, 10)
+    SidebarPadding.PaddingTop = UDim.new(0, 20)
     SidebarPadding.Parent = Sidebar
 
     local ContentContainer = Instance.new("Frame")
-    ContentContainer.Size = UDim2.new(1, -150, 1, -40)
-    ContentContainer.Position = UDim2.new(0, 150, 0, 40)
+    ContentContainer.Size = UDim2.new(1, -65, 1, -60)
+    ContentContainer.Position = UDim2.new(0, 65, 0, 60)
     ContentContainer.BackgroundTransparency = 1
     ContentContainer.Parent = MainFrame
 
-    function Window:CreateTab(options)
+        function Window:CreateTab(options)
         local TabName = options.Name or "Tab"
         
         local TabButton = Instance.new("TextButton")
-        TabButton.Size = UDim2.new(1, 0, 0, 32)
+        TabButton.Size = UDim2.new(0, 45, 0, 45)
         TabButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        TabButton.BackgroundTransparency = 0.95
-        TabButton.Text = "  " .. TabName
-        TabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
-        TabButton.TextSize = 13
-        TabButton.Font = Enum.Font.GothamMedium
-        TabButton.TextXAlignment = Enum.TextXAlignment.Left
+        TabButton.BackgroundTransparency = 1
+        TabButton.Text = TabName:sub(1,1):upper()
+        TabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+        TabButton.TextSize = 16
+        TabButton.Font = Enum.Font.GothamBold
         TabButton.Parent = Sidebar
-        Round(TabButton, 6)
+        Round(TabButton, 8)
+
+        local SelectionIndicator = Instance.new("Frame")
+        SelectionIndicator.Size = UDim2.new(0, 3, 0, 0)
+        SelectionIndicator.Position = UDim2.new(0, -10, 0.5, 0)
+        SelectionIndicator.BackgroundColor3 = WindowColor
+        SelectionIndicator.BorderSizePixel = 0
+        SelectionIndicator.Parent = TabButton
+        Round(SelectionIndicator, 2)
 
         local TabPage = Instance.new("ScrollingFrame")
         TabPage.Size = UDim2.new(1, 0, 1, 0)
         TabPage.BackgroundTransparency = 1
-        TabPage.ScrollBarThickness = 2
-        TabPage.ScrollBarImageColor3 = Window.Color
+        TabPage.ScrollBarThickness = 0
         TabPage.Visible = false
         TabPage.Parent = ContentContainer
 
         local PageList = Instance.new("UIListLayout")
         PageList.SortOrder = Enum.SortOrder.LayoutOrder
-        PageList.Padding = UDim.new(0, 8)
+        PageList.Padding = UDim.new(0, 10)
         PageList.Parent = TabPage
 
         local PagePadding = Instance.new("UIPadding")
         PagePadding.PaddingTop = UDim.new(0, 10)
         PagePadding.PaddingLeft = UDim.new(0, 15)
         PagePadding.PaddingRight = UDim.new(0, 15)
-        PagePadding.PaddingBottom = UDim.new(0, 10)
+        PagePadding.PaddingBottom = UDim.new(0, 15)
         PagePadding.Parent = TabPage
 
         AddConnection(PageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -464,17 +440,21 @@ function Alchemy:CreateWindow(options)
         AddConnection(TabButton.MouseButton1Click:Connect(function()
             for _, tab in pairs(Window.Tabs) do
                 tab.Page.Visible = false
-                Tween(tab.Button, {BackgroundTransparency = 0.95, TextColor3 = Color3.fromRGB(180, 180, 180)}, 0.2)
+                Tween(tab.Button, {TextColor3 = Color3.fromRGB(150, 150, 150), BackgroundTransparency = 1}, 0.2)
+                Tween(tab.Button.Frame, {Size = UDim2.new(0, 3, 0, 0), Position = UDim2.new(0, -10, 0.5, 0)}, 0.2)
             end
             TabPage.Visible = true
-            Tween(TabButton, {BackgroundTransparency = 0.8, TextColor3 = Window.Color}, 0.2)
+            Tween(TabButton, {TextColor3 = Color3.fromRGB(240, 240, 240), BackgroundTransparency = 0.9}, 0.2)
+            Tween(SelectionIndicator, {Size = UDim2.new(0, 3, 0, 25), Position = UDim2.new(0, -4, 0.5, -12.5)}, 0.2)
             Window.CurrentTab = TabName
         end))
 
         if not Window.CurrentTab then
             TabPage.Visible = true
-            TabButton.BackgroundTransparency = 0.8
-            TabButton.TextColor3 = Window.Color
+            TabButton.BackgroundTransparency = 0.9
+            TabButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+            SelectionIndicator.Size = UDim2.new(0, 3, 0, 25)
+            SelectionIndicator.Position = UDim2.new(0, -4, 0.5, -12.5)
             Window.CurrentTab = TabName
         end
 
@@ -495,7 +475,6 @@ function Alchemy:CreateWindow(options)
 
             local Section = {}
             
-            -- PARAGRAPH
             function Section:CreateParagraph(opts)
                 local Title = opts.Title or "Paragraph"
                 local Content = opts.Content or "Content here."
@@ -503,25 +482,28 @@ function Alchemy:CreateWindow(options)
                 local ParaFrame = Instance.new("Frame")
                 ParaFrame.Name = Title
                 ParaFrame.Size = UDim2.new(1, 0, 0, 60)
-                ParaFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-                ParaFrame.BackgroundTransparency = 0.4
+                ParaFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
                 ParaFrame.Parent = TabPage
-                Round(ParaFrame, 6)
+                Round(ParaFrame, 8)
+                
+                local stroke = Instance.new("UIStroke", ParaFrame)
+                stroke.Color = Color3.fromRGB(255, 255, 255)
+                stroke.Transparency = 0.9
 
                 local TitleLbl = Instance.new("TextLabel")
-                TitleLbl.Size = UDim2.new(1, -20, 0, 20)
-                TitleLbl.Position = UDim2.new(0, 10, 0, 5)
+                TitleLbl.Size = UDim2.new(1, -20, 0, 25)
+                TitleLbl.Position = UDim2.new(0, 15, 0, 8)
                 TitleLbl.BackgroundTransparency = 1
                 TitleLbl.Text = Title
-                TitleLbl.TextColor3 = Window.Color
+                TitleLbl.TextColor3 = WindowColor
                 TitleLbl.TextSize = 13
                 TitleLbl.Font = Enum.Font.GothamBold
                 TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
                 TitleLbl.Parent = ParaFrame
 
                 local ContentLbl = Instance.new("TextLabel")
-                ContentLbl.Size = UDim2.new(1, -20, 1, -30)
-                ContentLbl.Position = UDim2.new(0, 10, 0, 25)
+                ContentLbl.Size = UDim2.new(1, -30, 1, -40)
+                ContentLbl.Position = UDim2.new(0, 15, 0, 32)
                 ContentLbl.BackgroundTransparency = 1
                 ContentLbl.Text = Content
                 ContentLbl.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -532,17 +514,16 @@ function Alchemy:CreateWindow(options)
                 ContentLbl.TextYAlignment = Enum.TextYAlignment.Top
                 ContentLbl.Parent = ParaFrame
                 
-                -- Auto adjust height
-                local reqHeight = 35 + (string.len(Content) / 45) * 15
-                ParaFrame.Size = UDim2.new(1, 0, 0, math.max(60, reqHeight))
+                local reqHeight = 45 + (string.len(Content) / 50) * 15
+                ParaFrame.Size = UDim2.new(1, 0, 0, math.max(65, reqHeight))
                 
                 return {
                     Set = function(newOpts)
                         if newOpts.Title then TitleLbl.Text = newOpts.Title end
                         if newOpts.Content then 
                             ContentLbl.Text = newOpts.Content
-                            local nH = 35 + (string.len(newOpts.Content) / 45) * 15
-                            Tween(ParaFrame, {Size = UDim2.new(1, 0, 0, math.max(60, nH))}, 0.2)
+                            local nH = 45 + (string.len(newOpts.Content) / 50) * 15
+                            Tween(ParaFrame, {Size = UDim2.new(1, 0, 0, math.max(65, nH))}, 0.2)
                         end
                     end
                 }
@@ -553,35 +534,43 @@ function Alchemy:CreateWindow(options)
                 local btnName = opts.Name or "Button"
                 local callback = opts.Callback or function() end
 
-                local BtnFrame = Instance.new("TextButton")
+                local BtnFrame = Instance.new("Frame")
                 BtnFrame.Name = btnName
-                BtnFrame.Size = UDim2.new(1, 0, 0, 36)
-                BtnFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-                BtnFrame.BackgroundTransparency = 0.4
-                BtnFrame.Text = btnName
-                BtnFrame.TextColor3 = Color3.fromRGB(220, 220, 220)
-                BtnFrame.TextSize = 13
-                BtnFrame.Font = Enum.Font.Gotham
+                BtnFrame.Size = UDim2.new(1, 0, 0, 45)
+                BtnFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
                 BtnFrame.Parent = TabPage
-                Round(BtnFrame, 6)
+                Round(BtnFrame, 8)
+                
+                local stroke = Instance.new("UIStroke", BtnFrame)
+                stroke.Color = Color3.fromRGB(255, 255, 255)
+                stroke.Transparency = 0.9
 
-                local s = Instance.new("UIStroke")
-                s.Color = Color3.fromRGB(40, 40, 50)
-                s.Parent = BtnFrame
+                local Title = Instance.new("TextLabel")
+                Title.Size = UDim2.new(1, -120, 1, 0)
+                Title.Position = UDim2.new(0, 15, 0, 0)
+                Title.BackgroundTransparency = 1
+                Title.Text = btnName
+                Title.TextColor3 = Color3.fromRGB(230, 230, 230)
+                Title.TextSize = 13
+                Title.Font = Enum.Font.GothamMedium
+                Title.TextXAlignment = Enum.TextXAlignment.Left
+                Title.Parent = BtnFrame
 
-                AddConnection(BtnFrame.MouseEnter:Connect(function()
-                    Tween(BtnFrame, {BackgroundColor3 = Color3.fromRGB(30, 30, 35)}, 0.2)
-                    Tween(s, {Color = Window.Color}, 0.2)
-                end))
-                AddConnection(BtnFrame.MouseLeave:Connect(function()
-                    Tween(BtnFrame, {BackgroundColor3 = Color3.fromRGB(20, 20, 25)}, 0.2)
-                    Tween(s, {Color = Color3.fromRGB(40, 40, 50)}, 0.2)
-                end))
+                local InteractBtn = Instance.new("TextButton")
+                InteractBtn.Size = UDim2.new(0, 100, 0, 30)
+                InteractBtn.Position = UDim2.new(1, -115, 0.5, -15)
+                InteractBtn.BackgroundColor3 = WindowColor
+                InteractBtn.Text = "Execute"
+                InteractBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                InteractBtn.TextSize = 12
+                InteractBtn.Font = Enum.Font.GothamBold
+                InteractBtn.Parent = BtnFrame
+                Round(InteractBtn, 6)
 
-                AddConnection(BtnFrame.MouseButton1Click:Connect(function()
-                    Tween(BtnFrame, {Size = UDim2.new(1, -4, 0, 32)}, 0.1)
+                AddConnection(InteractBtn.MouseButton1Click:Connect(function()
+                    Tween(InteractBtn, {Size = UDim2.new(0, 95, 0, 26)}, 0.1)
                     task.wait(0.1)
-                    Tween(BtnFrame, {Size = UDim2.new(1, 0, 0, 36)}, 0.1)
+                    Tween(InteractBtn, {Size = UDim2.new(0, 100, 0, 30)}, 0.1)
                     callback()
                 end))
             end
@@ -594,40 +583,46 @@ function Alchemy:CreateWindow(options)
 
                 local KeyHolder = Instance.new("Frame")
                 KeyHolder.Name = kName
-                KeyHolder.Size = UDim2.new(1, 0, 0, 36)
-                KeyHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-                KeyHolder.BackgroundTransparency = 0.4
+                KeyHolder.Size = UDim2.new(1, 0, 0, 45)
+                KeyHolder.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
                 KeyHolder.Parent = TabPage
-                Round(KeyHolder, 6)
+                Round(KeyHolder, 8)
+                
+                local stroke = Instance.new("UIStroke", KeyHolder)
+                stroke.Color = Color3.fromRGB(255, 255, 255)
+                stroke.Transparency = 0.9
 
                 local Label = Instance.new("TextLabel")
                 Label.Size = UDim2.new(1, -100, 1, 0)
-                Label.Position = UDim2.new(0, 10, 0, 0)
+                Label.Position = UDim2.new(0, 15, 0, 0)
                 Label.BackgroundTransparency = 1
                 Label.Text = kName
-                Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+                Label.TextColor3 = Color3.fromRGB(230, 230, 230)
                 Label.TextSize = 13
-                Label.Font = Enum.Font.Gotham
+                Label.Font = Enum.Font.GothamMedium
                 Label.TextXAlignment = Enum.TextXAlignment.Left
                 Label.Parent = KeyHolder
 
                 local BindBtn = Instance.new("TextButton")
-                BindBtn.Size = UDim2.new(0, 80, 0, 24)
-                BindBtn.Position = UDim2.new(1, -90, 0.5, -12)
-                BindBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+                BindBtn.Size = UDim2.new(0, 80, 0, 28)
+                BindBtn.Position = UDim2.new(1, -95, 0.5, -14)
+                BindBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
                 BindBtn.Text = currentKey.Name
-                BindBtn.TextColor3 = Window.Color
+                BindBtn.TextColor3 = WindowColor
                 BindBtn.TextSize = 12
                 BindBtn.Font = Enum.Font.GothamBold
                 BindBtn.Parent = KeyHolder
-                Round(BindBtn, 4)
+                Round(BindBtn, 6)
+                
+                local bstroke = Instance.new("UIStroke", BindBtn)
+                bstroke.Color = WindowColor
+                bstroke.Transparency = 0.8
 
                 local IsBinding = false
-
                 AddConnection(BindBtn.MouseButton1Click:Connect(function()
                     IsBinding = true
                     BindBtn.Text = "..."
-                    Tween(BindBtn, {BackgroundColor3 = Color3.fromRGB(60, 60, 70)}, 0.2)
+                    Tween(bstroke, {Transparency = 0.3}, 0.2)
                 end))
 
                 AddConnection(UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -635,7 +630,7 @@ function Alchemy:CreateWindow(options)
                         if IsBinding and input.UserInputType == Enum.UserInputType.Keyboard then
                             currentKey = input.KeyCode
                             BindBtn.Text = currentKey.Name
-                            Tween(BindBtn, {BackgroundColor3 = Color3.fromRGB(40, 40, 50)}, 0.2)
+                            Tween(bstroke, {Transparency = 0.8}, 0.2)
                             IsBinding = false
                         elseif not IsBinding and input.KeyCode == currentKey then
                             callback(currentKey.Name)
@@ -659,31 +654,36 @@ function Alchemy:CreateWindow(options)
 
                 local InpHolder = Instance.new("Frame")
                 InpHolder.Name = iName
-                InpHolder.Size = UDim2.new(1, 0, 0, 46)
-                InpHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-                InpHolder.BackgroundTransparency = 0.4
+                InpHolder.Size = UDim2.new(1, 0, 0, 55)
+                InpHolder.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
                 InpHolder.Parent = TabPage
-                Round(InpHolder, 6)
+                Round(InpHolder, 8)
+                
+                local istroke = Instance.new("UIStroke", InpHolder)
+                istroke.Color = Color3.fromRGB(255, 255, 255)
+                istroke.Transparency = 0.9
 
                 local Label = Instance.new("TextLabel")
-                Label.Size = UDim2.new(1, -10, 0, 20)
-                Label.Position = UDim2.new(0, 10, 0, 2)
+                Label.Size = UDim2.new(1, -20, 0, 25)
+                Label.Position = UDim2.new(0, 15, 0, 5)
                 Label.BackgroundTransparency = 1
                 Label.Text = iName
-                Label.TextColor3 = Color3.fromRGB(220, 220, 220)
-                Label.TextSize = 12
-                Label.Font = Enum.Font.Gotham
+                Label.TextColor3 = Color3.fromRGB(230, 230, 230)
+                Label.TextSize = 13
+                Label.Font = Enum.Font.GothamMedium
                 Label.TextXAlignment = Enum.TextXAlignment.Left
                 Label.Parent = InpHolder
 
                 local BoxBG = Instance.new("Frame")
-                BoxBG.Size = UDim2.new(1, -20, 0, 20)
-                BoxBG.Position = UDim2.new(0, 10, 0, 22)
-                BoxBG.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+                BoxBG.Size = UDim2.new(1, -30, 0, 24)
+                BoxBG.Position = UDim2.new(0, 15, 0, 26)
+                BoxBG.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
                 BoxBG.Parent = InpHolder
-                Round(BoxBG, 4)
+                Round(BoxBG, 6)
+                
                 local stroke = Instance.new("UIStroke", BoxBG)
                 stroke.Color = Color3.fromRGB(50, 50, 60)
+                stroke.Transparency = 0.5
 
                 local TextBox = Instance.new("TextBox")
                 TextBox.Size = UDim2.new(1, -10, 1, 0)
@@ -691,8 +691,8 @@ function Alchemy:CreateWindow(options)
                 TextBox.BackgroundTransparency = 1
                 TextBox.Text = ""
                 TextBox.PlaceholderText = placeHolder
-                TextBox.TextColor3 = Window.Color
-                TextBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+                TextBox.TextColor3 = WindowColor
+                TextBox.PlaceholderColor3 = Color3.fromRGB(80, 80, 80)
                 TextBox.TextSize = 12
                 TextBox.Font = Enum.Font.Gotham
                 TextBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -702,9 +702,9 @@ function Alchemy:CreateWindow(options)
                 AddConnection(TextBox.FocusLost:Connect(function(enterPressed)
                     if enterPressed then
                         callback(TextBox.Text)
-                        Tween(stroke, {Color = Window.Color}, 0.1)
+                        Tween(stroke, {Color = WindowColor, Transparency = 0}, 0.1)
                         task.wait(0.2)
-                        Tween(stroke, {Color = Color3.fromRGB(50, 50, 60)}, 0.3)
+                        Tween(stroke, {Color = Color3.fromRGB(50, 50, 60), Transparency = 0.5}, 0.3)
                     end
                 end))
             end
@@ -718,55 +718,62 @@ function Alchemy:CreateWindow(options)
 
                 local DropHolder = Instance.new("Frame")
                 DropHolder.Name = dName
-                DropHolder.Size = UDim2.new(1, 0, 0, 36)
-                DropHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-                DropHolder.BackgroundTransparency = 0.4
+                DropHolder.Size = UDim2.new(1, 0, 0, 45)
+                DropHolder.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
                 DropHolder.ClipsDescendants = true
                 DropHolder.Parent = TabPage
-                Round(DropHolder, 6)
+                Round(DropHolder, 8)
+                
+                local dstroke = Instance.new("UIStroke", DropHolder)
+                dstroke.Color = Color3.fromRGB(255, 255, 255)
+                dstroke.Transparency = 0.9
 
                 local MainBtn = Instance.new("TextButton")
-                MainBtn.Size = UDim2.new(1, 0, 0, 36)
+                MainBtn.Size = UDim2.new(1, 0, 0, 45)
                 MainBtn.BackgroundTransparency = 1
                 MainBtn.Text = ""
                 MainBtn.Parent = DropHolder
 
                 local Label = Instance.new("TextLabel")
-                Label.Size = UDim2.new(1, -150, 1, 0)
-                Label.Position = UDim2.new(0, 10, 0, 0)
+                Label.Size = UDim2.new(1, -160, 1, 0)
+                Label.Position = UDim2.new(0, 15, 0, 0)
                 Label.BackgroundTransparency = 1
                 Label.Text = dName
-                Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+                Label.TextColor3 = Color3.fromRGB(230, 230, 230)
                 Label.TextSize = 13
-                Label.Font = Enum.Font.Gotham
+                Label.Font = Enum.Font.GothamMedium
                 Label.TextXAlignment = Enum.TextXAlignment.Left
                 Label.Parent = MainBtn
 
                 local SelectBox = Instance.new("Frame")
-                SelectBox.Size = UDim2.new(0, 120, 0, 24)
-                SelectBox.Position = UDim2.new(1, -130, 0.5, -12)
-                SelectBox.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+                SelectBox.Size = UDim2.new(0, 130, 0, 28)
+                SelectBox.Position = UDim2.new(1, -145, 0.5, -14)
+                SelectBox.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
                 SelectBox.Parent = MainBtn
-                Round(SelectBox, 4)
+                Round(SelectBox, 6)
+                
+                local sstroke = Instance.new("UIStroke", SelectBox)
+                sstroke.Color = WindowColor
+                sstroke.Transparency = 0.8
 
                 local SelectLabel = Instance.new("TextLabel")
-                SelectLabel.Size = UDim2.new(1, -5, 1, 0)
+                SelectLabel.Size = UDim2.new(1, -10, 1, 0)
                 SelectLabel.BackgroundTransparency = 1
                 SelectLabel.Text = tostring(current)
-                SelectLabel.TextColor3 = Window.Color
+                SelectLabel.TextColor3 = WindowColor
                 SelectLabel.TextSize = 12
                 SelectLabel.Font = Enum.Font.GothamBold
                 SelectLabel.Parent = SelectBox
 
                 local ItemsContainer = Instance.new("Frame")
-                ItemsContainer.Size = UDim2.new(1, -20, 0, 0) -- Grows dynamically
-                ItemsContainer.Position = UDim2.new(0, 10, 0, 36)
+                ItemsContainer.Size = UDim2.new(1, -30, 0, 0)
+                ItemsContainer.Position = UDim2.new(0, 15, 0, 45)
                 ItemsContainer.BackgroundTransparency = 1
                 ItemsContainer.Parent = DropHolder
 
                 local ItemList = Instance.new("UIListLayout")
                 ItemList.SortOrder = Enum.SortOrder.LayoutOrder
-                ItemList.Padding = UDim.new(0, 4)
+                ItemList.Padding = UDim.new(0, 5)
                 ItemList.Parent = ItemsContainer
 
                 local IsOpen = false
@@ -774,18 +781,18 @@ function Alchemy:CreateWindow(options)
 
                 local function PopulateOptions(optsList)
                     for _, old in ipairs(OptionBtns) do old:Destroy() end
-                    OptionBtns = {}
+                    table.clear(OptionBtns)
                     
                     for i, opt in ipairs(optsList) do
                         local optBtn = Instance.new("TextButton")
-                        optBtn.Size = UDim2.new(1, 0, 0, 26)
-                        optBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+                        optBtn.Size = UDim2.new(1, 0, 0, 30)
+                        optBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
                         optBtn.Text = tostring(opt)
-                        optBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+                        optBtn.TextColor3 = opt == current and WindowColor or Color3.fromRGB(180, 180, 180)
                         optBtn.TextSize = 12
                         optBtn.Font = Enum.Font.Gotham
                         optBtn.Parent = ItemsContainer
-                        Round(optBtn, 4)
+                        Round(optBtn, 6)
                         table.insert(OptionBtns, optBtn)
 
                         AddConnection(optBtn.MouseButton1Click:Connect(function()
@@ -793,7 +800,7 @@ function Alchemy:CreateWindow(options)
                             SelectLabel.Text = tostring(opt)
                             callback(opt)
                             IsOpen = false
-                            Tween(DropHolder, {Size = UDim2.new(1, 0, 0, 36)}, 0.3, Enum.EasingStyle.Exponential)
+                            Tween(DropHolder, {Size = UDim2.new(1, 0, 0, 45)}, 0.3, Enum.EasingStyle.Exponential)
                         end))
                     end
                 end
@@ -803,10 +810,12 @@ function Alchemy:CreateWindow(options)
                 AddConnection(MainBtn.MouseButton1Click:Connect(function()
                     IsOpen = not IsOpen
                     if IsOpen then
-                        local requiredSize = 36 + (26 * #options) + (4 * #options) + 10
+                        local requiredSize = 45 + (35 * #options) + 10
                         Tween(DropHolder, {Size = UDim2.new(1, 0, 0, requiredSize)}, 0.3, Enum.EasingStyle.Exponential)
+                        Tween(sstroke, {Transparency = 0.3}, 0.2)
                     else
-                        Tween(DropHolder, {Size = UDim2.new(1, 0, 0, 36)}, 0.3, Enum.EasingStyle.Exponential)
+                        Tween(DropHolder, {Size = UDim2.new(1, 0, 0, 45)}, 0.3, Enum.EasingStyle.Exponential)
+                        Tween(sstroke, {Transparency = 0.8}, 0.2)
                     end
                 end))
 
@@ -815,79 +824,19 @@ function Alchemy:CreateWindow(options)
                         current = val
                         SelectLabel.Text = tostring(val)
                         callback(val)
+                        PopulateOptions(options)
                     end,
                     Refresh = function(newOptions)
+                        options = newOptions
                         PopulateOptions(newOptions)
                         if IsOpen then
-                            local reqSize = 36 + (26 * #newOptions) + (4 * #newOptions) + 10
+                            local reqSize = 45 + (35 * #newOptions) + 10
                             Tween(DropHolder, {Size = UDim2.new(1, 0, 0, reqSize)}, 0.3)
                         end
                     end
                 }
             end
 
-            -- TOGGLE
-            function Section:CreateToggle(opts)
-                local tName = opts.Name or "Toggle"
-                local state = opts.Default or false
-                local callback = opts.Callback or function() end
-
-                local TglHolder = Instance.new("Frame")
-                TglHolder.Name = tName
-                TglHolder.Size = UDim2.new(1, 0, 0, 36)
-                TglHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-                TglHolder.BackgroundTransparency = 0.4
-                TglHolder.Parent = TabPage
-                Round(TglHolder, 6)
-
-                local Label = Instance.new("TextLabel")
-                Label.Size = UDim2.new(1, -60, 1, 0)
-                Label.Position = UDim2.new(0, 10, 0, 0)
-                Label.BackgroundTransparency = 1
-                Label.Text = tName
-                Label.TextColor3 = Color3.fromRGB(220, 220, 220)
-                Label.TextSize = 13
-                Label.Font = Enum.Font.Gotham
-                Label.TextXAlignment = Enum.TextXAlignment.Left
-                Label.Parent = TglHolder
-
-                local SwitchBG = Instance.new("Frame")
-                SwitchBG.Size = UDim2.new(0, 40, 0, 20)
-                SwitchBG.Position = UDim2.new(1, -50, 0.5, -10)
-                SwitchBG.BackgroundColor3 = state and Window.Color or Color3.fromRGB(40, 40, 50)
-                SwitchBG.Parent = TglHolder
-                Round(SwitchBG, 10)
-
-                local Knob = Instance.new("Frame")
-                Knob.Size = UDim2.new(0, 16, 0, 16)
-                Knob.Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-                Knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Knob.Parent = SwitchBG
-                Round(Knob, 8)
-
-                local Btn = Instance.new("TextButton")
-                Btn.Size = UDim2.new(1, 0, 1, 0)
-                Btn.BackgroundTransparency = 1
-                Btn.Text = ""
-                Btn.Parent = TglHolder
-
-                AddConnection(Btn.MouseButton1Click:Connect(function()
-                    state = not state
-                    Tween(SwitchBG, {BackgroundColor3 = state and Window.Color or Color3.fromRGB(40, 40, 50)}, 0.2)
-                    Tween(Knob, {Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}, 0.2, Enum.EasingStyle.Back)
-                    callback(state)
-                end))
-
-                return {
-                    Set = function(val)
-                        state = val
-                        Tween(SwitchBG, {BackgroundColor3 = state and Window.Color or Color3.fromRGB(40, 40, 50)}, 0.2)
-                        Tween(Knob, {Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}, 0.2, Enum.EasingStyle.Back)
-                        callback(state)
-                    end,
-                    Get = function() return state end
-                }
-            end
 
             -- SLIDER
             function Section:CreateSlider(opts)
@@ -899,86 +848,84 @@ function Alchemy:CreateWindow(options)
 
                 local SldrHolder = Instance.new("Frame")
                 SldrHolder.Name = sName
-                SldrHolder.Size = UDim2.new(1, 0, 0, 50)
-                SldrHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-                SldrHolder.BackgroundTransparency = 0.4
+                SldrHolder.Size = UDim2.new(1, 0, 0, 60)
+                SldrHolder.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
                 SldrHolder.Parent = TabPage
-                Round(SldrHolder, 6)
+                Round(SldrHolder, 8)
+                
+                local sstroke = Instance.new("UIStroke", SldrHolder)
+                sstroke.Color = Color3.fromRGB(255, 255, 255)
+                sstroke.Transparency = 0.9
 
                 local Label = Instance.new("TextLabel")
-                Label.Size = UDim2.new(1, -60, 0, 24)
-                Label.Position = UDim2.new(0, 10, 0, 0)
+                Label.Size = UDim2.new(1, -70, 0, 30)
+                Label.Position = UDim2.new(0, 15, 0, 5)
                 Label.BackgroundTransparency = 1
                 Label.Text = sName
-                Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+                Label.TextColor3 = Color3.fromRGB(230, 230, 230)
                 Label.TextSize = 13
-                Label.Font = Enum.Font.Gotham
+                Label.Font = Enum.Font.GothamMedium
                 Label.TextXAlignment = Enum.TextXAlignment.Left
                 Label.Parent = SldrHolder
 
                 local ValueLabel = Instance.new("TextLabel")
-                ValueLabel.Size = UDim2.new(0, 50, 0, 24)
-                ValueLabel.Position = UDim2.new(1, -60, 0, 0)
+                ValueLabel.Size = UDim2.new(0, 50, 0, 30)
+                ValueLabel.Position = UDim2.new(1, -65, 0, 5)
                 ValueLabel.BackgroundTransparency = 1
                 ValueLabel.Text = tostring(sDef)
-                ValueLabel.TextColor3 = Window.Color
+                ValueLabel.TextColor3 = WindowColor
                 ValueLabel.TextSize = 13
                 ValueLabel.Font = Enum.Font.GothamBold
                 ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
                 ValueLabel.Parent = SldrHolder
 
-                local TrackBG = Instance.new("Frame")
-                TrackBG.Size = UDim2.new(1, -20, 0, 6)
-                TrackBG.Position = UDim2.new(0, 10, 0, 32)
-                TrackBG.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-                TrackBG.Parent = SldrHolder
-                Round(TrackBG, 3)
+                local SliderBG = Instance.new("Frame")
+                SliderBG.Size = UDim2.new(1, -30, 0, 6)
+                SliderBG.Position = UDim2.new(0, 15, 0, 40)
+                SliderBG.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+                SliderBG.Parent = SldrHolder
+                Round(SliderBG, 3)
 
-                local Fill = Instance.new("Frame")
-                local pct = math.clamp((sDef - sMin) / (sMax - sMin), 0, 1)
-                Fill.Size = UDim2.new(pct, 0, 1, 0)
-                Fill.BackgroundColor3 = Window.Color
-                Fill.Parent = TrackBG
-                Round(Fill, 3)
+                local SliderFill = Instance.new("Frame")
+                SliderFill.Size = UDim2.new((sDef - sMin) / (sMax - sMin), 0, 1, 0)
+                SliderFill.BackgroundColor3 = WindowColor
+                SliderFill.Parent = SliderBG
+                Round(SliderFill, 3)
 
-                local DragBtn = Instance.new("TextButton")
-                DragBtn.Size = UDim2.new(1, 0, 1, 20)
-                DragBtn.Position = UDim2.new(0, 0, 0, -10)
-                DragBtn.BackgroundTransparency = 1
-                DragBtn.Text = ""
-                DragBtn.Parent = TrackBG
+                local SliderBtn = Instance.new("TextButton")
+                SliderBtn.Size = UDim2.new(1, 0, 1, 0)
+                SliderBtn.BackgroundTransparency = 1
+                SliderBtn.Text = ""
+                SliderBtn.Parent = SliderBG
 
-                local dragging = false
-                AddConnection(DragBtn.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        dragging = true
-                    end
-                end))
-
-                AddConnection(UserInputService.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        dragging = false
-                    end
-                end))
-
-                local function updateSlider(input)
-                    local pos = math.clamp((input.Position.X - TrackBG.AbsolutePosition.X) / TrackBG.AbsoluteSize.X, 0, 1)
-                    local value = math.floor(sMin + ((sMax - sMin) * pos))
-                    Tween(Fill, {Size = UDim2.new(pos, 0, 1, 0)}, 0.1)
-                    ValueLabel.Text = tostring(value)
-                    callback(value)
+                local function UpdateSlider()
+                    local mousePos = UserInputService:GetMouseLocation().X
+                    local bgPos = SliderBG.AbsolutePosition.X
+                    local bgSize = SliderBG.AbsoluteSize.X
+                    local perc = math.clamp((mousePos - bgPos) / bgSize, 0, 1)
+                    local val = math.floor(sMin + (perc * (sMax - sMin)))
+                    
+                    Tween(SliderFill, {Size = UDim2.new(perc, 0, 1, 0)}, 0.1)
+                    ValueLabel.Text = tostring(val)
+                    callback(val)
                 end
 
+                local sliding = false
+                AddConnection(SliderBtn.MouseButton1Down:Connect(function() 
+                    sliding = true 
+                    UpdateSlider() 
+                end))
+                AddConnection(UserInputService.InputEnded:Connect(function(input) 
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then sliding = false end 
+                end))
                 AddConnection(UserInputService.InputChanged:Connect(function(input)
-                    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                        updateSlider(input)
-                    end
+                    if sliding and input.UserInputType == Enum.UserInputType.MouseMovement then UpdateSlider() end
                 end))
                 
                 return {
                     Set = function(val)
-                        local pos = math.clamp((val - sMin) / (sMax - sMin), 0, 1)
-                        Tween(Fill, {Size = UDim2.new(pos, 0, 1, 0)}, 0.1)
+                        local perc = math.clamp((val - sMin) / (sMax - sMin), 0, 1)
+                        Tween(SliderFill, {Size = UDim2.new(perc, 0, 1, 0)}, 0.1)
                         ValueLabel.Text = tostring(val)
                         callback(val)
                     end
@@ -988,16 +935,21 @@ function Alchemy:CreateWindow(options)
             function Section:CreateLabel(txt)
                 local lbl = Instance.new("TextLabel")
                 lbl.Name = "Label_" .. txt
-                lbl.Size = UDim2.new(1, 0, 0, 20)
+                lbl.Size = UDim2.new(1, 0, 0, 25)
                 lbl.BackgroundTransparency = 1
                 lbl.Text = txt
                 lbl.TextColor3 = Color3.fromRGB(150, 150, 150)
                 lbl.TextSize = 12
-                lbl.Font = Enum.Font.Gotham
+                lbl.Font = Enum.Font.GothamMedium
                 lbl.TextXAlignment = Enum.TextXAlignment.Left
                 lbl.Parent = TabPage
                 
-                return { Set = function(newTxt) lbl.Text = newTxt end }
+                local p = Instance.new("UIPadding", lbl)
+                p.PaddingLeft = UDim.new(0, 15)
+                
+                return {
+                    Set = function(new) lbl.Text = new end
+                }
             end
 
             return Section
